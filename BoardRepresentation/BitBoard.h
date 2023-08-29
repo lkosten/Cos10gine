@@ -41,7 +41,8 @@ typedef std::uint64_t bitboard;
 
 class BitBoard {
 public:
-
+    BitBoard() = default;
+    
     static BitBoard GetStartBoard();
 
     bitboard GetPiecePositions(PieceType piece);

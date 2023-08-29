@@ -5,7 +5,20 @@
 #include "BitBoard.h"
 
 BitBoard BitBoard::GetStartBoard() {
-    BitBoard start_board;
+    BitBoard start_board{};
+    start_board.f_board[PieceType::whitePawn] = StartPieceBitboard::whitePawnBitboard;
+    start_board.f_board[PieceType::whiteBishop] = StartPieceBitboard::whiteBishopBitboard;
+    start_board.f_board[PieceType::whiteKnight] = StartPieceBitboard::whiteKnightBitboard;
+    start_board.f_board[PieceType::whiteRook] = StartPieceBitboard::whiteRookBitboard;
+    start_board.f_board[PieceType::whiteQueen] = StartPieceBitboard::whiteQueenBitboard;
+    start_board.f_board[PieceType::whiteKing] = StartPieceBitboard::whiteKingBitboard;
 
-    start_board.f_board = {  };
+    start_board.f_board[PieceType::blackPawn] = StartPieceBitboard::blackPawnBitboard;
+    start_board.f_board[PieceType::blackBishop] = StartPieceBitboard::blackBishopBitboard;
+    start_board.f_board[PieceType::blackKnight] = StartPieceBitboard::blackKnightBitboard;
+    start_board.f_board[PieceType::blackRook] = StartPieceBitboard::blackRookBitboard;
+    start_board.f_board[PieceType::blackQueen] = StartPieceBitboard::blackQueenBitboard;
+    start_board.f_board[PieceType::blackKing] = StartPieceBitboard::blackKingBitboard;
+
+    return start_board;
 }
