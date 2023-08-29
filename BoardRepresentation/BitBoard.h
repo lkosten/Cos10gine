@@ -6,6 +6,7 @@
 #define LCOS10GINE_BITBOARD_H
 
 #include <cstdint>
+#include <fstream>
 
 #include "PieceDefines.h"
 
@@ -45,8 +46,9 @@ public:
 
     static BitBoard GetStartBoard();
 
-    bitboard GetPiecePositions(PieceType piece);
+    bitboard GetPiecePositions(PieceType piece) const;
 
+    void DebugDraw(std::ostream &out);
 private:
     bitboard f_board[PieceType::PIECE_TYPE_LEN];
     PlayerColor f_next_turn_player;

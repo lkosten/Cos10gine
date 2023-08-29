@@ -2,6 +2,7 @@
 // Created by Kostya on 8/29/2023.
 //
 
+#include <vector>
 #include "BitBoard.h"
 
 BitBoard BitBoard::GetStartBoard() {
@@ -24,6 +25,33 @@ BitBoard BitBoard::GetStartBoard() {
     return start_board;
 }
 
-bitboard BitBoard::GetPiecePositions(PieceType piece) {
+bitboard BitBoard::GetPiecePositions(PieceType piece) const {
     return f_board[piece];
+}
+
+void BitBoard::DebugDraw(std::ostream &out) {
+    std::vector<std::vector<int>> board(8, std::vector<int>(8, -1));
+
+    for (size_t piece = 0; piece < PieceType::PIECE_TYPE_LEN; ++piece) {
+        for (size_t square = 0; square < 64; ++square) {
+            if ((f_board[piece] >> square) & 1) {
+                board[square >> 3][square & 7] = static_cast<int>(piece);
+            }
+        }
+    }
+
+    static std::string chess_symb[PieceType::PIECE_TYPE_LEN] = {"♙", "♘", "♗", "♖", "♕", "♔",
+                                                                "♟︎", "♞", "♝", "♜", "♛", "♚"};
+    for (size_t rank = 0; rank < 8; ++rank) {
+        out << 8 - rank << " │";
+        for (size_t file = 0; file < 8; ++file) {
+            if (board[rank][file] == -1) {
+                out << (((rank + file) & 1) == 1 ? "⛉" : "⛊") << "│";
+            }
+            else {
+                out << chess_symb[board[rank][file]] << "│";
+            }
+        }
+        out << '\n';
+    }
 }
