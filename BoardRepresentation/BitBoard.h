@@ -17,7 +17,7 @@ typedef std::uint64_t bitboard;
  * FileIndex   = squareIndex modulo 8  = squareIndex & 7
  * RankIndex   = squareIndex div    8  = squareIndex >> 3
  *
- * Little-endian mapping
+ * Little-endian mapping (LERF)
  * a < h, 0 < 7
  *
  *   a1, b1, c1, d1, e1, f1, g1, h1,
