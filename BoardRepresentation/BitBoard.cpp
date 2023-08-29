@@ -42,14 +42,17 @@ void BitBoard::DebugDraw(std::ostream &out) {
 
     static std::string chess_symb[PieceType::PIECE_TYPE_LEN] = {"♙", "♘", "♗", "♖", "♕", "♔",
                                                                 "♟︎", "♞", "♝", "♜", "♛", "♚"};
+    static std::string vertical_delim = "│";
+    static std::string empty_square[2] = { "⛊", "⛉" };
+
     for (size_t rank = 0; rank < 8; ++rank) {
-        out << 8 - rank << " │";
+        out << 8 - rank << ' ' << vertical_delim;
         for (size_t file = 0; file < 8; ++file) {
             if (board[rank][file] == -1) {
-                out << (((rank + file) & 1) == 1 ? "⛉" : "⛊") << "│";
+                out << empty_square[(rank + file) & 1] << vertical_delim;
             }
             else {
-                out << chess_symb[board[rank][file]] << "│";
+                out << chess_symb[board[rank][file]] << vertical_delim;
             }
         }
         out << '\n';
