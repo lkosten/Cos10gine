@@ -51,4 +51,21 @@ private:
 };
 
 
+enum StartPieceBitboard : bitboard {
+    whitePawnBitboard = 65280,
+    whiteKnightBitboard = 66,
+    whiteBishopBitboard = 36,
+    whiteRookBitboard = 129,
+    whiteQueenBitboard = 8,
+    whiteKingBitboard = 16,
+
+    blackPawnBitboard = 71776119061217280,
+    blackKnightBitboard = 4755801206503243776,
+    blackBishopBitboard = 2594073385365405696,
+    blackRookBitboard = 9295429630892703744u,
+    blackQueenBitboard = 576460752303423488,
+    blackKingBitboard = 1152921504606846976,
+
+};
+
 #endif //LCOS10GINE_BITBOARD_H
