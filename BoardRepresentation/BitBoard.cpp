@@ -20,5 +20,10 @@ BitBoard BitBoard::GetStartBoard() {
     start_board.f_board[PieceType::blackQueen] = StartPieceBitboard::blackQueenBitboard;
     start_board.f_board[PieceType::blackKing] = StartPieceBitboard::blackKingBitboard;
 
+    start_board.f_next_turn_player = PlayerColor::white;
     return start_board;
+}
+
+bitboard BitBoard::GetPiecePositions(PieceType piece) {
+    return f_board[piece];
 }

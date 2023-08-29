@@ -42,13 +42,14 @@ typedef std::uint64_t bitboard;
 class BitBoard {
 public:
     BitBoard() = default;
-    
+
     static BitBoard GetStartBoard();
 
     bitboard GetPiecePositions(PieceType piece);
 
 private:
     bitboard f_board[PieceType::PIECE_TYPE_LEN];
+    PlayerColor f_next_turn_player;
 };
 
 
@@ -66,7 +67,6 @@ enum StartPieceBitboard : bitboard {
     blackRookBitboard = 9295429630892703744u,
     blackQueenBitboard = 576460752303423488,
     blackKingBitboard = 1152921504606846976,
-
 };
 
 #endif //LCOS10GINE_BITBOARD_H

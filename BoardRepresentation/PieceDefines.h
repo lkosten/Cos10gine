@@ -23,4 +23,11 @@ enum PieceType {
     PIECE_TYPE_LEN
 };
 
+enum PlayerColor {
+    white,
+    black,
+
+    PLAYER_NUMBER
+};
+
 #endif //LCOS10GINE_PIECEDEFINES_H
