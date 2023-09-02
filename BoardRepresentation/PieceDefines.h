@@ -5,29 +5,31 @@
 #ifndef LCOS10GINE_PIECEDEFINES_H
 #define LCOS10GINE_PIECEDEFINES_H
 
-enum PieceType {
-    whitePawn,
-    whiteKnight,
-    whiteBishop,
-    whiteRook,
-    whiteQueen,
-    whiteKing,
+#include <cstdint>
 
-    blackPawn,
-    blackKnight,
-    blackBishop,
-    blackRook,
-    blackQueen,
-    blackKing,
+enum PieceType : std::uint8_t {
+    WhitePawn,
+    WhiteKnight,
+    WhiteBishop,
+    WhiteRook,
+    WhiteQueen,
+    WhiteKing,
+
+    BlackPawn,
+    BlackKnight,
+    BlackBishop,
+    BlackRook,
+    BlackQueen,
+    BlackKing,
 
     PIECE_TYPE_LEN
 };
 
-enum PlayerColor {
-    white,
-    black,
+enum PlayerColor : uint8_t {
+    White = 0,
+    Black = 1,
 
-    PLAYER_NUMBER
+    PLAYER_NUMBER = 2
 };
 
 #endif //LCOS10GINE_PIECEDEFINES_H

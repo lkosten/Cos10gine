@@ -8,9 +8,13 @@
 #include <cstdint>
 #include <fstream>
 
-#include "PieceDefines.h"
-
 typedef std::uint64_t bitboard;
+
+#include "PieceDefines.h"
+#include "../MoveGenerator.h"
+
+
+class Move;
 
 /*
  * LSF mapping (Least Significant File)
@@ -48,6 +52,8 @@ public:
 
     bitboard GetPiecePositions(PieceType piece) const;
 
+    void MakeMove(const Move &move);
+
     void DebugDraw(std::ostream &out);
 private:
     bitboard f_board[PieceType::PIECE_TYPE_LEN];
@@ -66,7 +72,7 @@ enum StartPieceBitboard : bitboard {
     blackPawnBitboard = 71776119061217280,
     blackKnightBitboard = 4755801206503243776,
     blackBishopBitboard = 2594073385365405696,
-    blackRookBitboard = 9295429630892703744u,
+    blackRookBitboard = 9295429630892703744ull,
     blackQueenBitboard = 576460752303423488,
     blackKingBitboard = 1152921504606846976,
 };

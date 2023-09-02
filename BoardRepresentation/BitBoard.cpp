@@ -7,21 +7,21 @@
 
 BitBoard BitBoard::GetStartBoard() {
     BitBoard start_board{};
-    start_board.f_board[PieceType::whitePawn] = StartPieceBitboard::whitePawnBitboard;
-    start_board.f_board[PieceType::whiteBishop] = StartPieceBitboard::whiteBishopBitboard;
-    start_board.f_board[PieceType::whiteKnight] = StartPieceBitboard::whiteKnightBitboard;
-    start_board.f_board[PieceType::whiteRook] = StartPieceBitboard::whiteRookBitboard;
-    start_board.f_board[PieceType::whiteQueen] = StartPieceBitboard::whiteQueenBitboard;
-    start_board.f_board[PieceType::whiteKing] = StartPieceBitboard::whiteKingBitboard;
+    start_board.f_board[PieceType::WhitePawn] = StartPieceBitboard::whitePawnBitboard;
+    start_board.f_board[PieceType::WhiteBishop] = StartPieceBitboard::whiteBishopBitboard;
+    start_board.f_board[PieceType::WhiteKnight] = StartPieceBitboard::whiteKnightBitboard;
+    start_board.f_board[PieceType::WhiteRook] = StartPieceBitboard::whiteRookBitboard;
+    start_board.f_board[PieceType::WhiteQueen] = StartPieceBitboard::whiteQueenBitboard;
+    start_board.f_board[PieceType::WhiteKing] = StartPieceBitboard::whiteKingBitboard;
 
-    start_board.f_board[PieceType::blackPawn] = StartPieceBitboard::blackPawnBitboard;
-    start_board.f_board[PieceType::blackBishop] = StartPieceBitboard::blackBishopBitboard;
-    start_board.f_board[PieceType::blackKnight] = StartPieceBitboard::blackKnightBitboard;
-    start_board.f_board[PieceType::blackRook] = StartPieceBitboard::blackRookBitboard;
-    start_board.f_board[PieceType::blackQueen] = StartPieceBitboard::blackQueenBitboard;
-    start_board.f_board[PieceType::blackKing] = StartPieceBitboard::blackKingBitboard;
+    start_board.f_board[PieceType::BlackPawn] = StartPieceBitboard::blackPawnBitboard;
+    start_board.f_board[PieceType::BlackBishop] = StartPieceBitboard::blackBishopBitboard;
+    start_board.f_board[PieceType::BlackKnight] = StartPieceBitboard::blackKnightBitboard;
+    start_board.f_board[PieceType::BlackRook] = StartPieceBitboard::blackRookBitboard;
+    start_board.f_board[PieceType::BlackQueen] = StartPieceBitboard::blackQueenBitboard;
+    start_board.f_board[PieceType::BlackKing] = StartPieceBitboard::blackKingBitboard;
 
-    start_board.f_next_turn_player = PlayerColor::white;
+    start_board.f_next_turn_player = PlayerColor::White;
     return start_board;
 }
 
@@ -57,4 +57,66 @@ void BitBoard::DebugDraw(std::ostream &out) {
         }
         out << '\n';
     }
+}
+
+void BitBoard::MakeMove(const Move &move) {
+    bitboard source_piece_board = (1 << move.source_square);
+    bitboard target_piece_board = (1 << move.target_square);
+
+    f_board[move.source_piece] ^= source_piece_board;
+    f_board[move.source_piece] ^= target_piece_board;
+
+    switch (move.type) {
+        case MoveType::MoveSimple:
+            break;
+
+        case MoveType::CaptureSimple:
+            f_board[move.target_piece] ^= target_piece_board;
+            break;
+
+        case MoveType::CaptureEnPassant:
+            f_board[move.target_piece] ^=
+                    (f_next_turn_player == PlayerColor::White ?
+                    (target_piece_board >> 8) :
+                    (target_piece_board << 8));
+            break;
+
+        case MoveType::CapturePromotion:
+            f_board[move.target_piece] ^= target_piece_board;
+            f_board[move.source_piece] ^= target_piece_board;
+            f_board[move.promotion_piece] ^= target_piece_board;
+            break;
+
+        case MoveType::PromotionSimple:
+            f_board[move.source_piece] ^= target_piece_board;
+            f_board[move.promotion_piece] ^= target_piece_board;
+            break;
+
+        case MoveType::CastlingLeft:
+            if (f_next_turn_player == PlayerColor::White) {
+                f_board[PieceType::WhiteRook] ^= 1;
+                f_board[PieceType::WhiteRook] ^= 8;
+            }
+            else {
+                f_board[PieceType::BlackRook] ^= 72057594037927936;
+                f_board[PieceType::BlackRook] ^= 576460752303423488;
+            }
+            break;
+
+        case MoveType::CastlingRight:
+            if (f_next_turn_player == PlayerColor::White) {
+                f_board[PieceType::WhiteRook] ^= 128;
+                f_board[PieceType::WhiteRook] ^= 32;
+            }
+            else {
+                f_board[PieceType::BlackRook] ^= 9223372036854775808ull;
+                f_board[PieceType::BlackRook] ^= 2305843009213693952ull;
+            }
+            break;
+
+        case MOVE_TYPE_LEN:
+            break;
+    }
+
+    f_next_turn_player = static_cast<PlayerColor>(!f_next_turn_player);
 }
