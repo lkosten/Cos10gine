@@ -53,6 +53,7 @@ public:
     bitboard GetPiecePositions(PieceType piece) const;
 
     void MakeMove(const Move &move);
+    void UnMakeMove(const Move &move);
 
     void DebugDraw(std::ostream &out);
 private:

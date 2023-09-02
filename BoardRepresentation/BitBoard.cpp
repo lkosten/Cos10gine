@@ -120,3 +120,62 @@ void BitBoard::MakeMove(const Move &move) {
 
     f_next_turn_player = static_cast<PlayerColor>(!f_next_turn_player);
 }
+
+void BitBoard::UnMakeMove(const Move &move) {
+    bitboard source_piece_board = (1 << move.source_square);
+    bitboard target_piece_board = (1 << move.target_square);
+
+    f_board[move.source_piece] ^= source_piece_board;
+    f_board[move.source_piece] ^= target_piece_board;
+
+    switch (move.type) {
+        case MoveType::MoveSimple:
+            break;
+
+        case MoveType::CaptureSimple:
+            f_board[move.target_piece] ^= target_piece_board;
+            break;
+
+        case MoveType::CaptureEnPassant:
+            f_board[move.target_piece] ^=
+                    (f_next_turn_player == PlayerColor::White ?
+                     (target_piece_board >> 8) :
+                     (target_piece_board << 8));
+            break;
+
+        case MoveType::CapturePromotion:
+            f_board[move.target_piece] ^= target_piece_board;
+            f_board[move.source_piece] ^= target_piece_board;
+            f_board[move.promotion_piece] ^= target_piece_board;
+            break;
+
+        case MoveType::PromotionSimple:
+            f_board[move.source_piece] ^= target_piece_board;
+            f_board[move.promotion_piece] ^= target_piece_board;
+            break;
+
+        case MoveType::CastlingLeft:
+            if (f_next_turn_player == PlayerColor::White) {
+                f_board[PieceType::WhiteRook] ^= 1;
+                f_board[PieceType::WhiteRook] ^= 8;
+            } else {
+                f_board[PieceType::BlackRook] ^= 72057594037927936;
+                f_board[PieceType::BlackRook] ^= 576460752303423488;
+            }
+            break;
+
+        case MoveType::CastlingRight:
+            if (f_next_turn_player == PlayerColor::White) {
+                f_board[PieceType::WhiteRook] ^= 128;
+                f_board[PieceType::WhiteRook] ^= 32;
+            } else {
+                f_board[PieceType::BlackRook] ^= 9223372036854775808ull;
+                f_board[PieceType::BlackRook] ^= 2305843009213693952ull;
+            }
+            break;
+
+        case MOVE_TYPE_LEN:
+            break;
+    }
+    f_next_turn_player = static_cast<PlayerColor>(!f_next_turn_player);
+}
