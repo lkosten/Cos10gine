@@ -8,7 +8,7 @@
 #include <cstdint>
 
 enum PieceType : std::uint8_t {
-    WhitePawn,
+    WhitePawn = 0,
     WhiteKnight,
     WhiteBishop,
     WhiteRook,

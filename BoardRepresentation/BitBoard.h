@@ -56,6 +56,11 @@ public:
     void UnMakeMove(const Move &move);
 
     void DebugDraw(std::ostream &out);
+
+    PieceType GetPieceTypeBySquare(std::uint64_t square) const;
+
+    static const bitboard kAFileBitboard = 0x0101010101010101;
+    static const bitboard kHFileBitboard = 0x8080808080808080;
 private:
     bitboard f_board[PieceType::PIECE_TYPE_LEN];
     PlayerColor f_next_turn_player;

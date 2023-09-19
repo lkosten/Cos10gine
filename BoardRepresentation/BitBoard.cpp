@@ -40,19 +40,19 @@ void BitBoard::DebugDraw(std::ostream &out) {
         }
     }
 
-    static std::string chess_symb[PieceType::PIECE_TYPE_LEN] = {"♙", "♘", "♗", "♖", "♕", "♔",
-                                                                "♟︎", "♞", "♝", "♜", "♛", "♚"};
+    static std::string chess_symb[PieceType::PIECE_TYPE_LEN] = { "♟︎", "♞", "♝", "♜", "♛", "♚",
+                                                                 "♙", "♘", "♗", "♖", "♕", "♔"};
     static std::string vertical_delim = "│";
     static std::string empty_square[2] = { "⛊", "⛉" };
 
     for (size_t rank = 0; rank < 8; ++rank) {
         out << 8 - rank << ' ' << vertical_delim;
         for (size_t file = 0; file < 8; ++file) {
-            if (board[rank][file] == -1) {
-                out << empty_square[(rank + file) & 1] << vertical_delim;
+            if (board[7 - rank][file] == -1) {
+                out << empty_square[(7 - rank + file) & 1] << vertical_delim;
             }
             else {
-                out << chess_symb[board[rank][file]] << vertical_delim;
+                out << chess_symb[board[7 - rank][file]] << vertical_delim;
             }
         }
         out << '\n';
@@ -60,8 +60,8 @@ void BitBoard::DebugDraw(std::ostream &out) {
 }
 
 void BitBoard::MakeMove(const Move &move) {
-    bitboard source_piece_board = (1 << move.source_square);
-    bitboard target_piece_board = (1 << move.target_square);
+    bitboard source_piece_board = (1ull << move.source_square);
+    bitboard target_piece_board = (1ull << move.target_square);
 
     f_board[move.source_piece] ^= source_piece_board;
     f_board[move.source_piece] ^= target_piece_board;
@@ -122,8 +122,8 @@ void BitBoard::MakeMove(const Move &move) {
 }
 
 void BitBoard::UnMakeMove(const Move &move) {
-    bitboard source_piece_board = (1 << move.source_square);
-    bitboard target_piece_board = (1 << move.target_square);
+    bitboard source_piece_board = (1ull << move.source_square);
+    bitboard target_piece_board = (1ull << move.target_square);
 
     f_board[move.source_piece] ^= source_piece_board;
     f_board[move.source_piece] ^= target_piece_board;
@@ -178,4 +178,14 @@ void BitBoard::UnMakeMove(const Move &move) {
             break;
     }
     f_next_turn_player = static_cast<PlayerColor>(!f_next_turn_player);
+}
+
+PieceType BitBoard::GetPieceTypeBySquare(std::uint64_t square) const {
+    for (size_t type = PieceType::WhitePawn; type < PieceType::PIECE_TYPE_LEN; ++type) {
+        if ((f_board[type] & square) != 0) {
+            return static_cast<PieceType>(type);
+        }
+    }
+
+    return PieceType::PIECE_TYPE_LEN;
 }

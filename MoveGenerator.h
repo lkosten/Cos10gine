@@ -26,23 +26,31 @@ enum MoveType : std::uint8_t {
 };
 
 struct Move {
+    Move() = default;
+
     std::uint8_t source_square;
     std::uint8_t target_square;
 
     MoveType type;
+
     PieceType source_piece;
     PieceType target_piece;
+
     PieceType promotion_piece;
 };
 
 class MoveGenerator {
 public:
 
-    static std::vector<Move> GenerateLegalMoves(const BitBoard& board);
+    static std::vector<Move> GenerateMoves(const BitBoard& board);
 
 private:
 
     static bitboard GenerateOccupiedPositions(const BitBoard &board);
+    static bitboard GenerateBlackOccupiedPositions(const BitBoard &board);
+    static bitboard GenerateWhiteOccupiedPositions(const BitBoard &board);
+
+    static void GenerateWhitePawnMoves(const BitBoard &board, std::vector<Move> *all_moves);
 };
 
 

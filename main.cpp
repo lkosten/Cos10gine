@@ -12,6 +12,19 @@ int main() {
     BitBoard bb{};
     bb = BitBoard::GetStartBoard();
     bb.DebugDraw(std::cout);
+    std::cout << std::endl;
+    std::cout << std::endl;
+
+    auto moves = MoveGenerator::GenerateMoves(bb);
+
+    for (const auto &move : moves) {
+        bb.MakeMove(move);
+
+        bb.DebugDraw(std::cout);
+        std::cout << std::endl;
+        bb.UnMakeMove(move);
+    }
+
 
     return 0;
 }
