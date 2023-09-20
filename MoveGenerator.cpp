@@ -10,6 +10,9 @@ std::vector<Move> MoveGenerator::GenerateMoves(const BitBoard& board) {
     GenerateWhitePawnMoves(board, &all_moves);
     GenerateBlackPawnMoves(board, &all_moves);
 
+    GenerateWhiteKnightMoves(board, &all_moves);
+    GenerateBlackKnightMoves(board, &all_moves);
+
     return all_moves;
 }
 
@@ -283,3 +286,150 @@ void MoveGenerator::GenerateBlackPawnMoves(const BitBoard &board, std::vector<Mo
         }
     }
 }
+
+void MoveGenerator::GenerateWhiteKnightMoves(const BitBoard &board, std::vector<Move> *all_moves) {
+    bitboard white_occupied_positions = GenerateWhiteOccupiedPositions(board);
+    bitboard black_occupied_positions = GenerateBlackOccupiedPositions(board);
+
+    for (std::uint8_t ind = 0; ind < 64; ++ind) {
+        if (((board.GetPiecePositions(PieceType::WhiteKnight) >> ind) & 1) == 0) {
+            continue;
+        }
+
+        auto attack_pattern = GenerateKnightAttackPattern(ind);
+
+        for (const auto &attack_square : attack_pattern) {
+            if (((1ull << attack_square) & white_occupied_positions) != 0) {
+                continue;
+            }
+
+            Move move{};
+            move.source_square = ind;
+            move.target_square = attack_square;
+
+            move.source_piece = WhiteKnight;
+            move.promotion_piece = WhiteKnight;
+
+            // capturing
+            if (((1ull << attack_square) & black_occupied_positions) != 0) {
+                move.type = CaptureSimple;
+                move.target_piece = board.GetPieceTypeBySquare(1ull << attack_square);
+
+                all_moves->push_back(move);
+            }
+            else { // simple move
+                move.type = MoveSimple;
+                move.target_piece = board.GetPieceTypeBySquare(1ull << attack_square);
+
+                all_moves->push_back(move);
+            }
+        }
+    }
+}
+
+void MoveGenerator::GenerateBlackKnightMoves(const BitBoard &board, std::vector<Move> *all_moves) {
+    bitboard white_occupied_positions = GenerateWhiteOccupiedPositions(board);
+    bitboard black_occupied_positions = GenerateBlackOccupiedPositions(board);
+
+    for (std::uint8_t ind = 0; ind < 64; ++ind) {
+        if (((board.GetPiecePositions(PieceType::BlackKnight) >> ind) & 1) == 0) {
+            continue;
+        }
+
+        auto attack_pattern = GenerateKnightAttackPattern(ind);
+
+        for (const auto &attack_square : attack_pattern) {
+            if (((1ull << attack_square) & black_occupied_positions) != 0) {
+                continue;
+            }
+
+            Move move{};
+            move.source_square = ind;
+            move.target_square = attack_square;
+
+            move.source_piece = BlackKnight;
+            move.promotion_piece = BlackKnight;
+
+            // capturing
+            if (((1ull << attack_square) & white_occupied_positions) != 0) {
+                move.type = CaptureSimple;
+                move.target_piece = board.GetPieceTypeBySquare(1ull << attack_square);
+
+                all_moves->push_back(move);
+            }
+            else { // simple move
+                move.type = MoveSimple;
+                move.target_piece = board.GetPieceTypeBySquare(1ull << attack_square);
+
+                all_moves->push_back(move);
+            }
+        }
+    }
+}
+
+
+std::vector<std::uint8_t> MoveGenerator::GenerateKnightAttackPattern(std::uint8_t knight_pos) {
+    std::vector<std::uint8_t> attack_pattern;
+    attack_pattern.reserve(8);
+
+    bitboard knight_bb = (1ull << knight_pos);
+
+    // ind + 15
+    if ((knight_bb & BitBoard::kAFileBitboard) == 0
+        && (knight_bb & (BitBoard::k7RankBitboard | BitBoard::k8RankBitboard)) == 0) {
+
+        attack_pattern.push_back(knight_pos + 15);
+    }
+
+    // ind + 17
+    if ((knight_bb & BitBoard::kHFileBitboard) == 0
+        && (knight_bb & (BitBoard::k7RankBitboard | BitBoard::k8RankBitboard)) == 0) {
+
+        attack_pattern.push_back(knight_pos + 17);
+    }
+
+    // ind + 6
+    if ((knight_bb & (BitBoard::kAFileBitboard | BitBoard::kBFileBitboard)) == 0
+        && (knight_bb & BitBoard::k8RankBitboard) == 0) {
+
+        attack_pattern.push_back(knight_pos + 6);
+    }
+
+    // ind + 10
+    if ((knight_bb & (BitBoard::kGFileBitboard | BitBoard::kHFileBitboard)) == 0
+        && (knight_bb & BitBoard::k8RankBitboard) == 0) {
+
+        attack_pattern.push_back(knight_pos + 10);
+    }
+
+    // ind - 10
+    if ((knight_bb & (BitBoard::kAFileBitboard | BitBoard::kBFileBitboard)) == 0
+        && (knight_bb & BitBoard::k1RankBitboard) == 0) {
+
+        attack_pattern.push_back(knight_pos - 10);
+    }
+
+    // ind - 6
+    if ((knight_bb & (BitBoard::kGFileBitboard | BitBoard::kHFileBitboard)) == 0
+        && (knight_bb & BitBoard::k1RankBitboard) == 0) {
+
+        attack_pattern.push_back(knight_pos - 6);
+    }
+
+    // ind - 17
+    if ((knight_bb & BitBoard::kAFileBitboard) == 0
+        && (knight_bb & (BitBoard::k2RankBitboard | BitBoard::k1RankBitboard)) == 0) {
+
+        attack_pattern.push_back(knight_pos - 17);
+    }
+
+    // ind - 15
+    if ((knight_bb & BitBoard::kHFileBitboard) == 0
+        && (knight_bb & (BitBoard::k2RankBitboard | BitBoard::k1RankBitboard)) == 0) {
+
+        attack_pattern.push_back(knight_pos - 15);
+    }
+
+    return attack_pattern;
+}
+

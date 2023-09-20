@@ -51,8 +51,12 @@ private:
     static bitboard GenerateWhiteOccupiedPositions(const BitBoard &board);
 
     static void GenerateWhitePawnMoves(const BitBoard &board, std::vector<Move> *all_moves);
+    static void GenerateWhiteKnightMoves(const BitBoard &board, std::vector<Move> *all_moves);
 
     static void GenerateBlackPawnMoves(const BitBoard &board, std::vector<Move> *all_moves);
+    static void GenerateBlackKnightMoves(const BitBoard &board, std::vector<Move> *all_moves);
+
+    static std::vector<std::uint8_t> GenerateKnightAttackPattern(std::uint8_t knight_pos);
 };
 
 

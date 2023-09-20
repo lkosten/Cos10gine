@@ -60,7 +60,15 @@ public:
     PieceType GetPieceTypeBySquare(std::uint64_t square) const;
 
     static const bitboard kAFileBitboard = 0x0101010101010101;
+    static const bitboard kBFileBitboard = 0x0202020202020202;
+    static const bitboard kGFileBitboard = 0x4040404040404040;
     static const bitboard kHFileBitboard = 0x8080808080808080;
+
+    static const bitboard k1RankBitboard = 0x00000000000000FF;
+    static const bitboard k2RankBitboard = 0x000000000000FF00;
+    static const bitboard k7RankBitboard = 0x00FF000000000000;
+    static const bitboard k8RankBitboard = 0xFF00000000000000;
+
 private:
     bitboard f_board[PieceType::PIECE_TYPE_LEN];
     PlayerColor f_next_turn_player;
