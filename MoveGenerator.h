@@ -51,6 +51,8 @@ private:
     static bitboard GenerateWhiteOccupiedPositions(const BitBoard &board);
 
     static void GenerateWhitePawnMoves(const BitBoard &board, std::vector<Move> *all_moves);
+
+    static void GenerateBlackPawnMoves(const BitBoard &board, std::vector<Move> *all_moves);
 };
 
 
