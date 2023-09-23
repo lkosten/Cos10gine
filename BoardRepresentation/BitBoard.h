@@ -9,6 +9,7 @@
 #include <fstream>
 
 typedef std::uint64_t bitboard;
+typedef std::uint8_t squareInd;
 
 #include "PieceDefines.h"
 #include "../MoveGenerator.h"
