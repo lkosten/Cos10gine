@@ -79,7 +79,6 @@ void MoveGenerator::GenerateWhitePawnMoves(const BitBoard &board, std::vector<Mo
 
                 all_moves->push_back(move);
             }
-
         }
 
         // two squares push
@@ -432,4 +431,3 @@ std::vector<std::uint8_t> MoveGenerator::GenerateKnightAttackPattern(std::uint8_
 
     return attack_pattern;
 }
-
