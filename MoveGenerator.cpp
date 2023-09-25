@@ -3,15 +3,21 @@
 //
 
 #include "MoveGenerator.h"
+#include "BoardRayIterator.h"
 
 std::vector<Move> MoveGenerator::GenerateMoves(const BitBoard& board) {
     std::vector<Move> all_moves;
 
-    GenerateWhitePawnMoves(board, &all_moves);
-    GenerateBlackPawnMoves(board, &all_moves);
-
-    GenerateWhiteKnightMoves(board, &all_moves);
-    GenerateBlackKnightMoves(board, &all_moves);
+    if (board.GetPlayerToMove() == PlayerColor::White) {
+        GenerateWhitePawnMoves(board, &all_moves);
+        GenerateWhiteKnightMoves(board, &all_moves);
+        GenerateBishopMoves(board, &all_moves, PlayerColor::White);
+    }
+    else {
+        GenerateBlackPawnMoves(board, &all_moves);
+        GenerateBlackKnightMoves(board, &all_moves);
+        GenerateBishopMoves(board, &all_moves, PlayerColor::Black);
+    }
 
     return all_moves;
 }
@@ -430,4 +436,57 @@ std::vector<std::uint8_t> MoveGenerator::GenerateKnightAttackPattern(std::uint8_
     }
 
     return attack_pattern;
+}
+
+void MoveGenerator::GenerateBishopMoves(const BitBoard &board, std::vector<Move> *all_moves, const PlayerColor player) {
+    bitboard opponent_occupancy = (player == PlayerColor::White ?
+            GenerateBlackOccupiedPositions(board) : GenerateWhiteOccupiedPositions(board));
+    bitboard ally_occupancy = (player == PlayerColor::White ?
+            GenerateWhiteOccupiedPositions(board) : GenerateBlackOccupiedPositions(board));
+
+    std::vector<bitboard> bishops = BoardRayIterator::Bitscan(
+            board.GetPiecePositions(static_cast<PieceType>(player * 6 + WhiteBishop)));
+
+    for (const auto pos : bishops) {
+        BoardRayIterator it;
+        int dir = RayDirection::NE;
+        while(dir < RayDirection::NUMBER_OF_DIRECTIONS) {
+            it.SetBoardRay(pos, static_cast<RayDirection>(dir));
+            while(bitboard next_attack = it.GetNextRaySquareBitboard()) {
+                // empty square
+                if ((next_attack & (opponent_occupancy | ally_occupancy)) == 0) {
+                    Move move{};
+
+                    move.source_square = BoardRayIterator::MS1BInd(pos);
+                    move.target_square = BoardRayIterator::MS1BInd(next_attack);
+
+                    move.type = MoveSimple;
+
+                    move.source_piece = static_cast<PieceType>(player * 6 + WhiteBishop);
+                    move.target_piece = static_cast<PieceType>(player * 6 + WhiteBishop);
+
+                    all_moves->push_back(move);
+                }
+                // attack
+                else if ((next_attack & opponent_occupancy) != 0) {
+                    Move move{};
+
+                    move.source_square = BoardRayIterator::MS1BInd(pos);
+                    move.target_square = BoardRayIterator::MS1BInd(next_attack);
+
+                    move.type = CaptureSimple;
+
+                    move.source_piece = static_cast<PieceType>(player * 6 + WhiteBishop);
+                    move.target_piece = board.GetPieceTypeBySquare(next_attack);
+                    all_moves->push_back(move);
+                    break;
+                }
+                // ally blocker
+                else if ((next_attack & ally_occupancy) != 0) {
+                    break;
+                }
+            }
+            dir += 2;
+        }
+    }
 }

@@ -190,3 +190,7 @@ PieceType BitBoard::GetPieceTypeBySquare(std::uint64_t square) const {
 
     return PieceType::PIECE_TYPE_LEN;
 }
+
+PieceType BitBoard::GetPieceTypeBySquare(squareInd square) const {
+    return GetPieceTypeBySquare(1ull << square);
+}

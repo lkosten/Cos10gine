@@ -52,13 +52,15 @@ public:
     static BitBoard GetStartBoard();
 
     bitboard GetPiecePositions(PieceType piece) const;
+    PlayerColor GetPlayerToMove() const { return f_next_turn_player; }
 
     void MakeMove(const Move &move);
     void UnMakeMove(const Move &move);
 
     void DebugDraw(std::ostream &out);
 
-    PieceType GetPieceTypeBySquare(std::uint64_t square) const;
+    PieceType GetPieceTypeBySquare(bitboard square) const;
+    PieceType GetPieceTypeBySquare(squareInd square) const;
 
     static const bitboard kAFileBitboard = 0x0101010101010101;
     static const bitboard kBFileBitboard = 0x0202020202020202;

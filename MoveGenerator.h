@@ -57,6 +57,8 @@ private:
     static void GenerateBlackPawnMoves(const BitBoard &board, std::vector<Move> *all_moves);
     static void GenerateBlackKnightMoves(const BitBoard &board, std::vector<Move> *all_moves);
 
+    static void GenerateBishopMoves(const BitBoard &board, std::vector<Move> *all_moves, PlayerColor player);
+
     static std::vector<std::uint8_t> GenerateKnightAttackPattern(std::uint8_t knight_pos);
 
     constexpr static const std::array<bitboard, 64> kStraightAttackPattern

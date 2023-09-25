@@ -28,7 +28,13 @@ public:
     BoardRayIterator(squareInd index, RayDirection direction);
 
     void SetBoardRay(squareInd index, RayDirection direction);
+    void SetBoardRay(bitboard bb, RayDirection direction);
     bitboard GetNextRaySquareBitboard();
+
+    static bitboard LS1B(bitboard bb);
+    static bitboard MS1B(bitboard bb);
+    static bitboard MS1BInd(bitboard bb);
+    static std::vector<bitboard> Bitscan(bitboard bb);
 
 private:
     static void GeneratrePrecomputeRays();
@@ -40,9 +46,6 @@ private:
     static std::vector<std::vector<bitboard>> kRayPatterns;
 
     static bitboard GetRayByDirection(squareInd index, RayDirection direction);
-
-    static bitboard LS1B(bitboard bb);
-    static bitboard MS1B(bitboard bb);
 };
 
 
