@@ -57,6 +57,7 @@ void BitBoard::DebugDraw(std::ostream &out) {
         }
         out << '\n';
     }
+    out << '\n';
 }
 
 void BitBoard::MakeMove(const Move &move) {
