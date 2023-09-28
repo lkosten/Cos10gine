@@ -194,3 +194,19 @@ PieceType BitBoard::GetPieceTypeBySquare(std::uint64_t square) const {
 PieceType BitBoard::GetPieceTypeBySquare(squareInd square) const {
     return GetPieceTypeBySquare(1ull << square);
 }
+
+void BitBoard::SetEnPassantRule(const Move &move) {
+    if (move.type == MoveType::MoveSimple
+        && (move.source_piece == PieceType::WhitePawn || move.source_piece == PieceType::BlackPawn)
+        && (std::max(move.source_square, move.target_square) - std::min(move.source_square, move.target_square)) == 16) {
+
+        f_en_passant_square = std::min(move.source_square, move.target_square) + 8;
+    }
+    else {
+        f_en_passant_square = 0;
+    }
+}
+
+void BitBoard::SetCastlingRights(const Move &move) {
+
+}

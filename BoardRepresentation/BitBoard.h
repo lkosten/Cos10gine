@@ -75,6 +75,10 @@ public:
 private:
     bitboard f_board[PieceType::PIECE_TYPE_LEN];
     PlayerColor f_next_turn_player;
+    squareInd f_en_passant_square;
+
+    void SetEnPassantRule(const Move &move);
+    void SetCastlingRights(const Move &move);
 };
 
 

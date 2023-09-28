@@ -12,11 +12,15 @@ std::vector<Move> MoveGenerator::GenerateMoves(const BitBoard& board) {
         GenerateWhitePawnMoves(board, &all_moves);
         GenerateWhiteKnightMoves(board, &all_moves);
         GenerateBishopMoves(board, &all_moves, PlayerColor::White);
+        GenerateRookMoves(board, &all_moves, PlayerColor::White);
+        GenerateQueenMoves(board, &all_moves, PlayerColor::White);
     }
     else {
         GenerateBlackPawnMoves(board, &all_moves);
         GenerateBlackKnightMoves(board, &all_moves);
         GenerateBishopMoves(board, &all_moves, PlayerColor::Black);
+        GenerateRookMoves(board, &all_moves, PlayerColor::Black);
+        GenerateQueenMoves(board, &all_moves, PlayerColor::Black);
     }
 
     return all_moves;
