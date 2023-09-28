@@ -62,6 +62,11 @@ public:
     PieceType GetPieceTypeBySquare(bitboard square) const;
     PieceType GetPieceTypeBySquare(squareInd square) const;
 
+    bool IsWhiteLongCastleAllowed() const;
+    bool IsWhiteShortCastleAllowed() const;
+    bool IsBlackLongCastleAllowed() const;
+    bool IsBlackShortCastleAllowed() const;
+
     static const bitboard kAFileBitboard = 0x0101010101010101;
     static const bitboard kBFileBitboard = 0x0202020202020202;
     static const bitboard kGFileBitboard = 0x4040404040404040;

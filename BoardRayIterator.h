@@ -33,7 +33,7 @@ public:
 
     static bitboard LS1B(bitboard bb);
     static bitboard MS1B(bitboard bb);
-    static bitboard MS1BInd(bitboard bb);
+    static squareInd MS1BInd(bitboard bb);
     static std::vector<bitboard> Bitscan(bitboard bb);
 
 private:

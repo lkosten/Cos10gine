@@ -20,8 +20,8 @@ enum MoveType : std::uint8_t {
     CapturePromotion,
     PromotionSimple,
 
-    CastlingLeft,
-    CastlingRight,
+    CastlingLong,
+    CastlingShort,
 
     MOVE_TYPE_LEN
 };

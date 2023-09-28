@@ -102,7 +102,7 @@ bitboard BoardRayIterator::MS1B(bitboard bb) {
         return 0;
     }
 
-    static const int index64[64] = {
+    static const squareInd index64[64] = {
             0, 47,  1, 56, 48, 27,  2, 60,
             57, 49, 41, 37, 28, 16,  3, 61,
             54, 58, 35, 52, 50, 42, 21, 44,
@@ -123,12 +123,12 @@ bitboard BoardRayIterator::MS1B(bitboard bb) {
     return (1ull << index64[(bb * debruijn64) >> 58]);
 }
 
-bitboard BoardRayIterator::MS1BInd(bitboard bb) {
+squareInd BoardRayIterator::MS1BInd(bitboard bb) {
     if (bb == 0) {
         return 0;
     }
 
-    static const int index64[64] = {
+    static const squareInd index64[64] = {
             0, 47,  1, 56, 48, 27,  2, 60,
             57, 49, 41, 37, 28, 16,  3, 61,
             54, 58, 35, 52, 50, 42, 21, 44,

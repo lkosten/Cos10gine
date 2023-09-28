@@ -95,7 +95,7 @@ void BitBoard::MakeMove(const Move &move) {
             f_board[move.promotion_piece] ^= target_piece_board;
             break;
 
-        case MoveType::CastlingLeft:
+        case MoveType::CastlingLong:
             if (f_next_turn_player == PlayerColor::White) {
                 f_board[PieceType::WhiteRook] ^= 1;
                 f_board[PieceType::WhiteRook] ^= 8;
@@ -106,7 +106,7 @@ void BitBoard::MakeMove(const Move &move) {
             }
             break;
 
-        case MoveType::CastlingRight:
+        case MoveType::CastlingShort:
             if (f_next_turn_player == PlayerColor::White) {
                 f_board[PieceType::WhiteRook] ^= 128;
                 f_board[PieceType::WhiteRook] ^= 32;
@@ -157,7 +157,7 @@ void BitBoard::UnMakeMove(const Move &move) {
             f_board[move.promotion_piece] ^= target_piece_board;
             break;
 
-        case MoveType::CastlingLeft:
+        case MoveType::CastlingLong:
             if (f_next_turn_player == PlayerColor::White) {
                 f_board[PieceType::WhiteRook] ^= 1;
                 f_board[PieceType::WhiteRook] ^= 8;
@@ -167,7 +167,7 @@ void BitBoard::UnMakeMove(const Move &move) {
             }
             break;
 
-        case MoveType::CastlingRight:
+        case MoveType::CastlingShort:
             if (f_next_turn_player == PlayerColor::White) {
                 f_board[PieceType::WhiteRook] ^= 128;
                 f_board[PieceType::WhiteRook] ^= 32;
@@ -242,4 +242,20 @@ void BitBoard::SetCastlingRights(const Move &move) {
         default:
             break;
     }
+}
+
+bool BitBoard::IsWhiteLongCastleAllowed() const {
+    return f_castling_rights.white_long_catle;
+}
+
+bool BitBoard::IsWhiteShortCastleAllowed() const {
+    return f_castling_rights.white_short_catle;
+}
+
+bool BitBoard::IsBlackLongCastleAllowed() const {
+    return f_castling_rights.black_long_catle;
+}
+
+bool BitBoard::IsBlackShortCastleAllowed() const {
+    return f_castling_rights.black_short_catle;
 }

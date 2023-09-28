@@ -307,7 +307,7 @@ void MoveGenerator::GenerateWhiteKnightMoves(const BitBoard &board, std::vector<
 
         auto attack_pattern = GenerateKnightAttackPattern(ind);
 
-        for (const auto &attack_square : attack_pattern) {
+        for (const auto attack_square : attack_pattern) {
             if (((1ull << attack_square) & white_occupied_positions) != 0) {
                 continue;
             }
@@ -599,7 +599,83 @@ void MoveGenerator::GenerateQueenMoves(const BitBoard &board, std::vector<Move> 
 }
 
 void MoveGenerator::GenerateKingMoves(const BitBoard &board, std::vector<Move> *all_moves, PlayerColor player) {
+    bitboard opponent_occupancy = (player == PlayerColor::White ?
+                                   GenerateBlackOccupiedPositions(board) : GenerateWhiteOccupiedPositions(board));
+    bitboard ally_occupancy = (player == PlayerColor::White ?
+                               GenerateWhiteOccupiedPositions(board) : GenerateBlackOccupiedPositions(board));
 
+    bitboard king_bb = board.GetPiecePositions(static_cast<PieceType>(player * 6 + WhiteKing));
+    squareInd king_pos_ind = BoardRayIterator::MS1BInd(king_bb);
+
+    auto attack_pattern = GenerateKingtAttackPattern(king_pos_ind);
+
+    for (const auto attack_square : attack_pattern) {
+        if (((1ull << attack_square) & ally_occupancy) != 0) {
+            continue;
+        }
+
+        Move move{};
+        move.source_square = king_pos_ind;
+        move.target_square = attack_square;
+
+        move.source_piece = static_cast<PieceType>(player * 6 + WhiteKing);
+        move.promotion_piece = static_cast<PieceType>(player * 6 + WhiteKing);
+
+        // capturing
+        if (((1ull << attack_square) & opponent_occupancy) != 0) {
+            move.type = CaptureSimple;
+            move.target_piece = board.GetPieceTypeBySquare(1ull << attack_square);
+
+            all_moves->push_back(move);
+        }
+        else { // simple move
+            move.type = MoveSimple;
+            move.target_piece = board.GetPieceTypeBySquare(1ull << attack_square);
+
+            all_moves->push_back(move);
+        }
+    }
+
+
+    // long castling
+    if ((player == PlayerColor::White && board.IsWhiteLongCastleAllowed()
+        || player == PlayerColor::Black && board.IsBlackLongCastleAllowed())
+        && ((opponent_occupancy | ally_occupancy) & ((king_bb << 1) | (king_bb << 2) | (king_bb << 3))) == 0) {
+
+        Move move{};
+
+        move.source_square = king_pos_ind;
+        move.target_square = king_pos_ind - 2;
+
+        move.type = CastlingLong;
+
+        move.source_piece = static_cast<PieceType>(player * 6 + WhiteKing);
+        move.target_piece = static_cast<PieceType>(player * 6 + WhiteKing);
+
+        move.promotion_piece = static_cast<PieceType>(player * 6 + WhiteKing);
+
+        all_moves->push_back(move);
+    }
+
+    // short castling
+    if ((player == PlayerColor::White && board.IsWhiteShortCastleAllowed()
+         || player == PlayerColor::Black && board.IsBlackShortCastleAllowed())
+        && ((opponent_occupancy | ally_occupancy) & ((king_bb >> 1) | (king_bb >> 2))) == 0) {
+
+        Move move{};
+
+        move.source_square = king_pos_ind;
+        move.target_square = king_pos_ind + 2;
+
+        move.type = CastlingShort;
+
+        move.source_piece = static_cast<PieceType>(player * 6 + WhiteKing);
+        move.target_piece = static_cast<PieceType>(player * 6 + WhiteKing);
+
+        move.promotion_piece = static_cast<PieceType>(player * 6 + WhiteKing);
+
+        all_moves->push_back(move);
+    }
 }
 
 std::vector<std::uint8_t> MoveGenerator::GenerateKingtAttackPattern(std::uint8_t king_pos) {
