@@ -596,5 +596,65 @@ void MoveGenerator::GenerateQueenMoves(const BitBoard &board, std::vector<Move> 
         }
         ++dir;
     }
+}
 
+void MoveGenerator::GenerateKingMoves(const BitBoard &board, std::vector<Move> *all_moves, PlayerColor player) {
+
+}
+
+std::vector<std::uint8_t> MoveGenerator::GenerateKingtAttackPattern(std::uint8_t king_pos) {
+    std::vector<std::uint8_t> attack_pattern;
+    attack_pattern.reserve(8);
+
+    bitboard king_bb = (1ull << king_pos);
+
+    // ind - 1
+    if ((king_bb & BitBoard::k1RankBitboard) == 0) {
+        attack_pattern.push_back(king_pos - 1);
+    }
+
+    // ind + 1
+    if ((king_bb & BitBoard::k8RankBitboard) == 0) {
+        attack_pattern.push_back(king_pos + 1);
+    }
+
+    // ind - 8
+    if ((king_bb & BitBoard::kAFileBitboard) == 0) {
+        attack_pattern.push_back(king_pos - 8);
+    }
+
+    // ind + 8
+    if ((king_bb & BitBoard::kHFileBitboard) == 0) {
+        attack_pattern.push_back(king_pos + 8);
+    }
+
+    // ind + 7
+    if ((king_bb & BitBoard::kHFileBitboard) == 0
+        && (king_bb & BitBoard::k1RankBitboard) == 0) {
+
+        attack_pattern.push_back(king_pos + 7);
+    }
+
+    // ind + 9
+    if ((king_bb & BitBoard::kHFileBitboard) == 0
+        && (king_bb & BitBoard::k8RankBitboard) == 0) {
+
+        attack_pattern.push_back(king_pos + 9);
+    }
+
+    // ind - 9
+    if ((king_bb & BitBoard::kAFileBitboard) == 0
+        && (king_bb & BitBoard::k1RankBitboard) == 0) {
+
+        attack_pattern.push_back(king_pos - 9);
+    }
+
+    // ind - 7
+    if ((king_bb & BitBoard::kAFileBitboard) == 0
+        && (king_bb & BitBoard::k8RankBitboard) == 0) {
+
+        attack_pattern.push_back(king_pos - 7);
+    }
+
+    return attack_pattern;
 }

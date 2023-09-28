@@ -61,6 +61,8 @@ void BitBoard::DebugDraw(std::ostream &out) {
 }
 
 void BitBoard::MakeMove(const Move &move) {
+    SetEnPassantRule(move);
+    SetCastlingRights(move);
     bitboard source_piece_board = (1ull << move.source_square);
     bitboard target_piece_board = (1ull << move.target_square);
 
