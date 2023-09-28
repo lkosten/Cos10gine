@@ -77,6 +77,15 @@ private:
     PlayerColor f_next_turn_player;
     squareInd f_en_passant_square;
 
+    struct CastlingRights {
+        bool white_long_catle;
+        bool white_short_catle;
+
+        bool black_long_catle;
+        bool black_short_catle;
+
+    } f_castling_rights;
+
     void SetEnPassantRule(const Move &move);
     void SetCastlingRights(const Move &move);
 };

@@ -208,5 +208,36 @@ void BitBoard::SetEnPassantRule(const Move &move) {
 }
 
 void BitBoard::SetCastlingRights(const Move &move) {
+    switch (move.source_piece) {
+        case PieceType::WhiteKing:
+            f_castling_rights.white_long_catle = false;
+            f_castling_rights.white_short_catle = false;
+            break;
 
+        case PieceType::BlackKing:
+            f_castling_rights.black_long_catle = false;
+            f_castling_rights.black_short_catle = false;
+            break;
+
+        case PieceType::WhiteRook:
+            if (move.source_square == 0) {
+                f_castling_rights.white_long_catle = false;
+            }
+            else if (move.source_square == 7) {
+                f_castling_rights.white_short_catle = false;
+            }
+            break;
+
+        case PieceType::BlackRook:
+            if (move.source_square == 56) {
+                f_castling_rights.black_long_catle = false;
+            }
+            else if (move.source_square == 63) {
+                f_castling_rights.black_short_catle = false;
+            }
+            break;
+
+        default:
+            break;
+    }
 }
