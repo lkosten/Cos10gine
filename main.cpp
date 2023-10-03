@@ -135,8 +135,8 @@ void MakeFullMoves(ChessGame *perft_test, size_t depth) {
     bool mate = true;
     for (const auto &move : moves) {
         if (perft_test->TryMakeMove(move)) {
-            if ((move.type == MoveType::CaptureSimple || move.type == MoveType::CaptureEnPassant || move.type == MoveType::CapturePromotion)
-                && depth == 1) {
+            if (depth == 1 &&
+                (move.type == MoveType::CaptureSimple || move.type == MoveType::CaptureEnPassant || move.type == MoveType::CapturePromotion)) {
                 if (move.target_piece == WhiteKing || move.target_piece == BlackKing) {
                     std::cout << "\n\n\nSUCK\n\n\n\n\n";
                 }
@@ -144,14 +144,14 @@ void MakeFullMoves(ChessGame *perft_test, size_t depth) {
                 }
                 ++cnt_capt;
             }
-            if (move.type == MoveType::CaptureEnPassant) {
+            if (depth == 1 && move.type == MoveType::CaptureEnPassant ) {
                 //perft_test->GetLastBoard().DebugDraw(std::cout);
                 //std::cout.flush();
                 ++cnt_en_p;
             }
-            if (MoveGenerator::IsKingInCheck(perft_test->GetLastBoard(),
+            if (depth == 1 && MoveGenerator::IsKingInCheck(perft_test->GetLastBoard(),
                     perft_test->GetLastBoard().GetPlayerToMove())) {
-                if (depth == 1) ++cnt_check;
+                ++cnt_check;
             }
             if (move.type == CastlingLong || move.type == CastlingShort) {
                 ++cnt_castle;
@@ -165,18 +165,13 @@ void MakeFullMoves(ChessGame *perft_test, size_t depth) {
         }
     }
 
-    if (mate) {
+    if (mate && depth == 1) {
         ++cnt_mate;
     }
 
 }
 
-ChessGame testing;
-
-int main() {
-    SetConsoleOutputCP( 65001 );
-
-
+void PerftTest() {
     ChessGame perft_test;
     size_t depth = 6;
     std::cin >> depth;
@@ -191,6 +186,14 @@ int main() {
     std::cout << cnt_mate << " mate moves\n";
     std::cout << cnt_en_p << " en passant moves\n";
     std::cout << cnt_castle << " castle moves\n";
+}
+int main() {
+    SetConsoleOutputCP( 65001 );
+
+    FEN::GetBitBoardFromFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1").DebugDraw(std::cout);
+    FEN::GetBitBoardFromFEN("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1").DebugDraw(std::cout);
+    FEN::GetBitBoardFromFEN("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2").DebugDraw(std::cout);
+    FEN::GetBitBoardFromFEN("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2").DebugDraw(std::cout);
 
     return 0;
 }

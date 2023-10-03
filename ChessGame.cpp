@@ -9,6 +9,10 @@ ChessGame::ChessGame() : f_boards() {
     f_boards.push_back(BitBoard::GetStartBoard());
 }
 
+ChessGame::ChessGame(const std::string &fen) : f_boards() {
+    f_boards.push_back(FEN::GetBitBoardFromFEN(fen));
+}
+
 bool ChessGame::TryMakeMove(const Move &move) {
     auto last_board = f_boards.back();
 
@@ -29,4 +33,3 @@ void ChessGame::UnMakeMove() {
 BitBoard ChessGame::GetLastBoard() const {
     return f_boards.back();
 }
-

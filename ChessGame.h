@@ -11,6 +11,7 @@
 class ChessGame {
 public:
     ChessGame();
+    ChessGame(const std::string &fen);
 
     bool TryMakeMove(const Move &move);
     void UnMakeMove();

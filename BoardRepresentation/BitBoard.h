@@ -13,7 +13,7 @@ typedef std::uint8_t squareInd;
 
 #include "PieceDefines.h"
 #include "../MoveGenerator.h"
-
+#include "../ChessNotations/FEN.h"
 
 class Move;
 
@@ -95,6 +95,10 @@ private:
 
     void SetEnPassantRule(const Move &move);
     void SetCastlingRights(const Move &move);
+
+    static const squareInd kNoEnPassantFlag = 64;
+
+    friend class FEN;
 };
 
 

@@ -207,7 +207,7 @@ void BitBoard::SetEnPassantRule(const Move &move) {
         f_en_passant_square = std::min(move.source_square, move.target_square) + 8;
     }
     else {
-        f_en_passant_square = 0;
+        f_en_passant_square = kNoEnPassantFlag;
     }
 }
 
