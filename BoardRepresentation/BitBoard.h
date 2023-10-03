@@ -59,7 +59,7 @@ public:
 
     void DebugDraw(std::ostream &out);
 
-    PieceType GetPieceTypeBySquare(bitboard square) const;
+    PieceType GetPieceTypeBySquare(bitboard square_bb) const;
     PieceType GetPieceTypeBySquare(squareInd square) const;
 
     squareInd GetEnPassantAttackSquare() const;

@@ -273,11 +273,11 @@ void MoveGenerator::GenerateBlackPawnMoves(const BitBoard &board, std::vector<Mo
 
         // left diagonal capture
         if (((1ull << ind) & BitBoard::kAFileBitboard) == 0
-            && ((1ull << (ind - 7)) & white_occupied_positions) != 0) {
+            && ((1ull << (ind - 9)) & white_occupied_positions) != 0) {
 
             Move move{};
             move.source_square = ind;
-            move.target_square = ind - 7;
+            move.target_square = ind - 9;
 
             move.type = MoveType::CaptureSimple;
 
@@ -304,11 +304,11 @@ void MoveGenerator::GenerateBlackPawnMoves(const BitBoard &board, std::vector<Mo
 
         // right diagonal capture
         if (((1ull << ind) & BitBoard::kHFileBitboard) == 0
-            && ((1ull << (ind - 9)) & white_occupied_positions) != 0) {
+            && ((1ull << (ind - 7)) & white_occupied_positions) != 0) {
 
             Move move{};
             move.source_square = ind;
-            move.target_square = ind - 9;
+            move.target_square = ind - 7;
 
             move.type = MoveType::CaptureSimple;
 
@@ -682,7 +682,7 @@ void MoveGenerator::GenerateKingMoves(const BitBoard &board, std::vector<Move> *
     bitboard king_bb = board.GetPiecePositions(static_cast<PieceType>(player * 6 + WhiteKing));
     squareInd king_pos_ind = BoardRayIterator::MS1BInd(king_bb);
 
-    auto attack_pattern = GenerateKingtAttackPattern(king_pos_ind);
+    auto attack_pattern = GenerateKingAttackPattern(king_pos_ind);
 
     for (const auto attack_square : attack_pattern) {
         if (((1ull << attack_square) & ally_occupancy) != 0) {
@@ -753,7 +753,7 @@ void MoveGenerator::GenerateKingMoves(const BitBoard &board, std::vector<Move> *
     }
 }
 
-std::vector<std::uint8_t> MoveGenerator::GenerateKingtAttackPattern(std::uint8_t king_pos) {
+std::vector<std::uint8_t> MoveGenerator::GenerateKingAttackPattern(std::uint8_t king_pos) {
     std::vector<std::uint8_t> attack_pattern;
     attack_pattern.reserve(8);
 

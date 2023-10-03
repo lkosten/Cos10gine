@@ -135,11 +135,14 @@ void MakeFullMoves(ChessGame *perft_test, size_t depth) {
     bool mate = true;
     for (const auto &move : moves) {
         if (perft_test->TryMakeMove(move)) {
-            if (move.type == MoveType::CaptureSimple && depth == 1) {
-                ++cnt_capt;
+            if ((move.type == MoveType::CaptureSimple || move.type == MoveType::CaptureEnPassant || move.type == MoveType::CapturePromotion)
+                && depth == 1) {
                 if (move.target_piece == WhiteKing || move.target_piece == BlackKing) {
                     std::cout << "\n\n\nSUCK\n\n\n\n\n";
                 }
+                if (move.source_piece == BlackKnight && (move.source_square == 57)) {
+                }
+                ++cnt_capt;
             }
             if (move.type == MoveType::CaptureEnPassant) {
                 //perft_test->GetLastBoard().DebugDraw(std::cout);
@@ -168,14 +171,14 @@ void MakeFullMoves(ChessGame *perft_test, size_t depth) {
 
 }
 
+ChessGame testing;
 
 int main() {
     SetConsoleOutputCP( 65001 );
 
 
     ChessGame perft_test;
-
-    size_t depth;
+    size_t depth = 6;
     std::cin >> depth;
     const auto start{std::chrono::steady_clock::now()};
     MakeFullMoves(&perft_test, depth);

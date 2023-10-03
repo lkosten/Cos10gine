@@ -185,9 +185,9 @@ void BitBoard::UnMakeMove(const Move &move) {
     f_next_turn_player = static_cast<PlayerColor>(!f_next_turn_player);
 }
 
-PieceType BitBoard::GetPieceTypeBySquare(std::uint64_t square) const {
+PieceType BitBoard::GetPieceTypeBySquare(std::uint64_t square_bb) const {
     for (size_t type = PieceType::WhitePawn; type < PieceType::PIECE_TYPE_LEN; ++type) {
-        if ((f_board[type] & square) != 0) {
+        if ((f_board[type] & square_bb) != 0) {
             return static_cast<PieceType>(type);
         }
     }
