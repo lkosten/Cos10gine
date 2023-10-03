@@ -54,13 +54,15 @@ public:
     bitboard GetPiecePositions(PieceType piece) const;
     PlayerColor GetPlayerToMove() const { return f_next_turn_player; }
 
-    void MakeMove(const Move &move);
+    bool MakeMove(const Move &move);
     void UnMakeMove(const Move &move);
 
     void DebugDraw(std::ostream &out);
 
     PieceType GetPieceTypeBySquare(bitboard square) const;
     PieceType GetPieceTypeBySquare(squareInd square) const;
+
+    squareInd GetEnPassantAttackSquare() const;
 
     bool IsWhiteLongCastleAllowed() const;
     bool IsWhiteShortCastleAllowed() const;

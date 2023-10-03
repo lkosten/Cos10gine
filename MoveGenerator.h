@@ -42,7 +42,9 @@ struct Move {
 
 class MoveGenerator {
 public:
-    static std::vector<Move> GenerateMoves(const BitBoard& board);
+    static std::vector<Move> GenerateMoves(const BitBoard& board, PlayerColor player = PlayerColor::PLAYER_NUMBER);
+    static bitboard GeneratePlayerAttacks(const BitBoard& board, PlayerColor player = PlayerColor::PLAYER_NUMBER);
+    static bool IsKingInCheck(const BitBoard& board, PlayerColor player = PlayerColor::PLAYER_NUMBER);
 
 private:
 

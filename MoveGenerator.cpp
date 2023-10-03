@@ -5,15 +5,17 @@
 #include "MoveGenerator.h"
 #include "BoardRayIterator.h"
 
-std::vector<Move> MoveGenerator::GenerateMoves(const BitBoard& board) {
+std::vector<Move> MoveGenerator::GenerateMoves(const BitBoard& board, PlayerColor player) {
     std::vector<Move> all_moves;
 
-    if (board.GetPlayerToMove() == PlayerColor::White) {
+    if (player == PlayerColor::PLAYER_NUMBER && board.GetPlayerToMove() == PlayerColor::White
+        || player == PlayerColor::White) {
         GenerateWhitePawnMoves(board, &all_moves);
         GenerateWhiteKnightMoves(board, &all_moves);
         GenerateBishopMoves(board, &all_moves, PlayerColor::White);
         GenerateRookMoves(board, &all_moves, PlayerColor::White);
         GenerateQueenMoves(board, &all_moves, PlayerColor::White);
+        GenerateKingMoves(board, &all_moves, PlayerColor::White);
     }
     else {
         GenerateBlackPawnMoves(board, &all_moves);
@@ -21,6 +23,7 @@ std::vector<Move> MoveGenerator::GenerateMoves(const BitBoard& board) {
         GenerateBishopMoves(board, &all_moves, PlayerColor::Black);
         GenerateRookMoves(board, &all_moves, PlayerColor::Black);
         GenerateQueenMoves(board, &all_moves, PlayerColor::Black);
+        GenerateKingMoves(board, &all_moves, PlayerColor::Black);
     }
 
     return all_moves;
@@ -171,6 +174,42 @@ void MoveGenerator::GenerateWhitePawnMoves(const BitBoard &board, std::vector<Mo
                 all_moves->push_back(move);
             }
         }
+
+        // left en passant
+        if (((1ull << ind) & BitBoard::kAFileBitboard) == 0
+            && board.GetEnPassantAttackSquare() == ind + 7) {
+
+            Move move{};
+            move.source_square = ind;
+            move.target_square = ind + 7;
+
+            move.type = MoveType::CaptureEnPassant;
+
+            move.source_piece = WhitePawn;
+            move.target_piece = BlackPawn;
+
+            move.promotion_piece = WhitePawn;
+
+            all_moves->push_back(move);
+        }
+
+        // right en passant
+        if (((1ull << ind) & BitBoard::kHFileBitboard) == 0
+            && board.GetEnPassantAttackSquare() == ind + 9) {
+
+            Move move{};
+            move.source_square = ind;
+            move.target_square = ind + 9;
+
+            move.type = MoveType::CaptureEnPassant;
+
+            move.source_piece = WhitePawn;
+            move.target_piece = BlackPawn;
+
+            move.promotion_piece = WhitePawn;
+
+            all_moves->push_back(move);
+        }
     }
 }
 
@@ -292,6 +331,42 @@ void MoveGenerator::GenerateBlackPawnMoves(const BitBoard &board, std::vector<Mo
 
                 all_moves->push_back(move);
             }
+        }
+
+        // left en passant
+        if (((1ull << ind) & BitBoard::kAFileBitboard) == 0
+            && board.GetEnPassantAttackSquare() == ind - 9) {
+
+            Move move{};
+            move.source_square = ind;
+            move.target_square = ind - 9;
+
+            move.type = MoveType::CaptureEnPassant;
+
+            move.source_piece = BlackPawn;
+            move.target_piece = WhitePawn;
+
+            move.promotion_piece = BlackPawn;
+
+            all_moves->push_back(move);
+        }
+
+        // right en passant
+        if (((1ull << ind) & BitBoard::kHFileBitboard) == 0
+            && board.GetEnPassantAttackSquare() == ind - 7) {
+
+            Move move{};
+            move.source_square = ind;
+            move.target_square = ind - 7;
+
+            move.type = MoveType::CaptureEnPassant;
+
+            move.source_piece = BlackPawn;
+            move.target_piece = WhitePawn;
+
+            move.promotion_piece = BlackPawn;
+
+            all_moves->push_back(move);
         }
     }
 }
@@ -685,28 +760,28 @@ std::vector<std::uint8_t> MoveGenerator::GenerateKingtAttackPattern(std::uint8_t
     bitboard king_bb = (1ull << king_pos);
 
     // ind - 1
-    if ((king_bb & BitBoard::k1RankBitboard) == 0) {
+    if ((king_bb & BitBoard::kAFileBitboard) == 0) {
         attack_pattern.push_back(king_pos - 1);
     }
 
     // ind + 1
-    if ((king_bb & BitBoard::k8RankBitboard) == 0) {
+    if ((king_bb & BitBoard::kHFileBitboard) == 0) {
         attack_pattern.push_back(king_pos + 1);
     }
 
     // ind - 8
-    if ((king_bb & BitBoard::kAFileBitboard) == 0) {
+    if ((king_bb & BitBoard::k1RankBitboard) == 0) {
         attack_pattern.push_back(king_pos - 8);
     }
 
     // ind + 8
-    if ((king_bb & BitBoard::kHFileBitboard) == 0) {
+    if ((king_bb & BitBoard::k8RankBitboard) == 0) {
         attack_pattern.push_back(king_pos + 8);
     }
 
     // ind + 7
-    if ((king_bb & BitBoard::kHFileBitboard) == 0
-        && (king_bb & BitBoard::k1RankBitboard) == 0) {
+    if ((king_bb & BitBoard::kAFileBitboard) == 0
+        && (king_bb & BitBoard::k8RankBitboard) == 0) {
 
         attack_pattern.push_back(king_pos + 7);
     }
@@ -726,11 +801,33 @@ std::vector<std::uint8_t> MoveGenerator::GenerateKingtAttackPattern(std::uint8_t
     }
 
     // ind - 7
-    if ((king_bb & BitBoard::kAFileBitboard) == 0
-        && (king_bb & BitBoard::k8RankBitboard) == 0) {
+    if ((king_bb & BitBoard::kHFileBitboard) == 0
+        && (king_bb & BitBoard::k1RankBitboard) == 0) {
 
         attack_pattern.push_back(king_pos - 7);
     }
 
     return attack_pattern;
+}
+
+bitboard MoveGenerator::GeneratePlayerAttacks(const BitBoard& board, PlayerColor player) {
+    std::vector<Move> moves = GenerateMoves(board, player);
+
+    bitboard attacks_bb = 0;
+    for (const auto &move : moves) {
+        attacks_bb |= (1ull << move.target_square);
+    }
+
+    return attacks_bb;
+}
+
+bool MoveGenerator::IsKingInCheck(const BitBoard &board, PlayerColor player) {
+    if (player == PLAYER_NUMBER) {
+        player = board.GetPlayerToMove();
+    }
+
+    bitboard opponent_attacks =
+            MoveGenerator::GeneratePlayerAttacks(board,
+                                                 player == PlayerColor::White ? PlayerColor::Black : PlayerColor::White);
+    return (opponent_attacks & board.GetPiecePositions(static_cast<PieceType>(WhiteKing + 6 * player))) != 0;
 }
