@@ -630,6 +630,9 @@ void MoveGenerator::GenerateQueenMoves(const BitBoard &board, std::vector<Move> 
                                GenerateWhiteOccupiedPositions(board) : GenerateBlackOccupiedPositions(board));
 
     bitboard queen_pos = board.GetPiecePositions(static_cast<PieceType>(player * 6 + WhiteQueen));
+    if (queen_pos == 0) {
+        return;
+    }
 
     BoardRayIterator it;
     int dir = RayDirection::E;
@@ -680,6 +683,9 @@ void MoveGenerator::GenerateKingMoves(const BitBoard &board, std::vector<Move> *
                                GenerateWhiteOccupiedPositions(board) : GenerateBlackOccupiedPositions(board));
 
     bitboard king_bb = board.GetPiecePositions(static_cast<PieceType>(player * 6 + WhiteKing));
+    if (king_bb == 0) {
+        return;
+    }
     squareInd king_pos_ind = BoardRayIterator::MS1BInd(king_bb);
 
     auto attack_pattern = GenerateKingAttackPattern(king_pos_ind);
@@ -715,7 +721,7 @@ void MoveGenerator::GenerateKingMoves(const BitBoard &board, std::vector<Move> *
     // long castling
     if ((player == PlayerColor::White && board.IsWhiteLongCastleAllowed()
         || player == PlayerColor::Black && board.IsBlackLongCastleAllowed())
-        && ((opponent_occupancy | ally_occupancy) & ((king_bb << 1) | (king_bb << 2) | (king_bb << 3))) == 0) {
+        && ((opponent_occupancy | ally_occupancy) & ((king_bb >> 1) | (king_bb >> 2) | (king_bb >> 3))) == 0) {
 
         Move move{};
 
@@ -735,7 +741,7 @@ void MoveGenerator::GenerateKingMoves(const BitBoard &board, std::vector<Move> *
     // short castling
     if ((player == PlayerColor::White && board.IsWhiteShortCastleAllowed()
          || player == PlayerColor::Black && board.IsBlackShortCastleAllowed())
-        && ((opponent_occupancy | ally_occupancy) & ((king_bb >> 1) | (king_bb >> 2))) == 0) {
+        && ((opponent_occupancy | ally_occupancy) & ((king_bb << 1) | (king_bb << 2))) == 0) {
 
         Move move{};
 

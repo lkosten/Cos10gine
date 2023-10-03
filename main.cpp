@@ -153,7 +153,7 @@ void MakeFullMoves(ChessGame *perft_test, size_t depth) {
                     perft_test->GetLastBoard().GetPlayerToMove())) {
                 ++cnt_check;
             }
-            if (move.type == CastlingLong || move.type == CastlingShort) {
+            if (depth == 1 && move.type == CastlingLong || move.type == CastlingShort) {
                 ++cnt_castle;
             }
             mate = false;
@@ -174,26 +174,36 @@ void MakeFullMoves(ChessGame *perft_test, size_t depth) {
 void PerftTest() {
     ChessGame perft_test;
     size_t depth = 6;
-    std::cin >> depth;
-    const auto start{std::chrono::steady_clock::now()};
-    MakeFullMoves(&perft_test, depth);
-    const auto end{std::chrono::steady_clock::now()};
-    const std::chrono::duration<double> elapsed_seconds{end - start};
-    std::cout << elapsed_seconds.count() << '\n'; // C++20's chrono::duration operator<<
-    std::cout << cnt << " moves\n";
-    std::cout << cnt_capt << " capture moves\n";
-    std::cout << cnt_check << " check moves\n";
-    std::cout << cnt_mate << " mate moves\n";
-    std::cout << cnt_en_p << " en passant moves\n";
-    std::cout << cnt_castle << " castle moves\n";
+    //std::cin >> depth;
+    for (int i = 1; i <= depth; ++i) {
+        std::cout << "DEPTH " << i << std::endl;
+        const auto start{std::chrono::steady_clock::now()};
+        MakeFullMoves(&perft_test, i);
+        const auto end{std::chrono::steady_clock::now()};
+        const std::chrono::duration<double> elapsed_seconds{end - start};
+        std::cout << elapsed_seconds.count() << '\n'; // C++20's chrono::duration operator<<
+        std::cout << cnt << " moves\n";
+        std::cout << cnt_capt << " capture moves\n";
+        std::cout << cnt_check << " check moves\n";
+        std::cout << cnt_mate << " mate moves\n";
+        std::cout << cnt_en_p << " en passant moves\n";
+        std::cout << cnt_castle << " castle moves\n\n";
+        std::cout.flush();
+
+        cnt = 0;
+        cnt_capt = 0;
+        cnt_check = 0;
+        cnt_mate = 0;
+        cnt_en_p = 0;
+        cnt_castle = 0;
+    }
 }
 int main() {
     SetConsoleOutputCP( 65001 );
 
-    FEN::GetBitBoardFromFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1").DebugDraw(std::cout);
-    FEN::GetBitBoardFromFEN("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1").DebugDraw(std::cout);
-    FEN::GetBitBoardFromFEN("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2").DebugDraw(std::cout);
-    FEN::GetBitBoardFromFEN("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2").DebugDraw(std::cout);
+    PerftTest();
+
+    FEN::GetBitBoardFromFEN("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -").DebugDraw(std::cout);
 
     return 0;
 }

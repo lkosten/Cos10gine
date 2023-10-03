@@ -16,7 +16,7 @@ BitBoard FEN::GetBitBoardFromFEN(const std::string &fen) {
         tokens.push_back(cur_token);
     }
 
-    if (tokens.size() != 6) {
+    if (tokens.size() < 4) {
         throw std::runtime_error("Wrong FEN format string. Wrong number of tokens:\n" + fen);
     }
 
@@ -24,8 +24,12 @@ BitBoard FEN::GetBitBoardFromFEN(const std::string &fen) {
     SetSideToMove(&board, tokens[1]);
     SetCastlingAbility(&board, tokens[2]);
     SetEnPassant(&board, tokens[3]);
-    SetHalfMoveClock(&board, tokens[4]);
-    SetFullMoveCounter(&board, tokens[5]);
+    if (tokens.size() >= 5) {
+        SetHalfMoveClock(&board, tokens[4]);
+    }
+    if (tokens.size() >=6) {
+        SetFullMoveCounter(&board, tokens[5]);
+    }
 
     return board;
 }
@@ -123,16 +127,16 @@ void FEN::SetCastlingAbility(BitBoard *board, const std::string& castling) {
 
     for (const auto letter : castling) {
         if (letter == 'k') {
-            board->f_castling_rights.black_short_catle = false;
+            board->f_castling_rights.black_short_catle = true;
         }
         else if (letter == 'q') {
-            board->f_castling_rights.black_long_catle = false;
+            board->f_castling_rights.black_long_catle = true;
         }
         else if (letter == 'K') {
-            board->f_castling_rights.white_short_catle = false;
+            board->f_castling_rights.white_short_catle = true;
         }
         else if (letter == 'Q') {
-            board->f_castling_rights.white_long_catle = false;
+            board->f_castling_rights.white_long_catle = true;
         }
         else if (letter != '-') {
             throw std::runtime_error("Wrong FEN format string. Wrong castling ability token:\n" + castling);
