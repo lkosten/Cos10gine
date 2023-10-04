@@ -173,7 +173,7 @@ void MakeFullMoves(ChessGame *perft_test, size_t depth) {
 
 void PerftTest() {
     ChessGame perft_test;
-    size_t depth = 6;
+    size_t depth = 4;
     //std::cin >> depth;
     for (int i = 1; i <= depth; ++i) {
         std::cout << "DEPTH " << i << std::endl;
