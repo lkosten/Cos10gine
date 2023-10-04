@@ -123,6 +123,7 @@ size_t cnt_check = 0;
 size_t cnt_mate = 0;
 size_t cnt_en_p = 0;
 size_t cnt_castle = 0;
+size_t cnt_prom = 0;
 
 void MakeFullMoves(ChessGame *perft_test, size_t depth) {
     if (depth == 0) {
@@ -149,18 +150,22 @@ void MakeFullMoves(ChessGame *perft_test, size_t depth) {
                 //std::cout.flush();
                 ++cnt_en_p;
             }
-            if (depth == 1 && MoveGenerator::IsKingInCheck(perft_test->GetLastBoard(),
+            /*if (depth == 1 && MoveGenerator::IsKingInCheck(perft_test->GetLastBoard(),
                     perft_test->GetLastBoard().GetPlayerToMove())) {
                 ++cnt_check;
-            }
+            }*/
             if (depth == 1 && move.type == CastlingLong || move.type == CastlingShort) {
                 ++cnt_castle;
+            }
+            if (depth == 1 && move.type == PromotionSimple || move.type == CapturePromotion) {
+                ++cnt_prom;
             }
             mate = false;
 
             MakeFullMoves(perft_test, depth - 1);
             perft_test->UnMakeMove();
         }
+
         else {
         }
     }
@@ -172,7 +177,7 @@ void MakeFullMoves(ChessGame *perft_test, size_t depth) {
 }
 
 void PerftTest() {
-    ChessGame perft_test;
+    ChessGame perft_test("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10");
     size_t depth = 6;
     //std::cin >> depth;
     for (int i = 1; i <= depth; ++i) {
@@ -187,7 +192,8 @@ void PerftTest() {
         std::cout << cnt_check << " check moves\n";
         std::cout << cnt_mate << " mate moves\n";
         std::cout << cnt_en_p << " en passant moves\n";
-        std::cout << cnt_castle << " castle moves\n\n";
+        std::cout << cnt_castle << " castle moves\n";
+        std::cout << cnt_prom << " promotion moves\n\n";
         std::cout.flush();
 
         cnt = 0;
@@ -196,14 +202,13 @@ void PerftTest() {
         cnt_mate = 0;
         cnt_en_p = 0;
         cnt_castle = 0;
+        cnt_prom = 0;
     }
 }
 int main() {
     SetConsoleOutputCP( 65001 );
 
     PerftTest();
-
-    FEN::GetBitBoardFromFEN("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -").DebugDraw(std::cout);
 
     return 0;
 }
