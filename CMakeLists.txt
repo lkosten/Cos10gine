@@ -10,3 +10,5 @@ include_directories(engine)
 add_subdirectory(engine)
 
 target_link_libraries(ChessEngine ChessEngine_lib)
+
+add_subdirectory(tests)
