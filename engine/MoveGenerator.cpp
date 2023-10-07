@@ -80,7 +80,7 @@ void MoveGenerator::GenerateWhitePawnMoves(const BitBoard &board, std::vector<Mo
             if (((1ull << ind) & StartPieceBitboard::blackPawnBitboard) != 0) {
                 move.type = MoveType::PromotionSimple;
 
-                for (size_t piece = 1; piece < BlackPawn; ++piece) {
+                for (size_t piece = 1; piece < WhiteKing; ++piece) {
                     move.promotion_piece = static_cast<PieceType>(piece);
 
                     all_moves->push_back(move);
@@ -130,7 +130,7 @@ void MoveGenerator::GenerateWhitePawnMoves(const BitBoard &board, std::vector<Mo
             if (((1ull << ind) & StartPieceBitboard::blackPawnBitboard) != 0) {
                 move.type = MoveType::CapturePromotion;
 
-                for (size_t piece = 1; piece < BlackPawn; ++piece) {
+                for (size_t piece = 1; piece < WhiteKing; ++piece) {
                     move.promotion_piece = static_cast<PieceType>(piece);
 
                     all_moves->push_back(move);
@@ -161,7 +161,7 @@ void MoveGenerator::GenerateWhitePawnMoves(const BitBoard &board, std::vector<Mo
             if (((1ull << ind) & StartPieceBitboard::blackPawnBitboard) != 0) {
                 move.type = MoveType::CapturePromotion;
 
-                for (size_t piece = 1; piece < BlackPawn; ++piece) {
+                for (size_t piece = 1; piece < WhiteKing; ++piece) {
                     move.promotion_piece = static_cast<PieceType>(piece);
 
                     all_moves->push_back(move);
@@ -237,7 +237,7 @@ void MoveGenerator::GenerateBlackPawnMoves(const BitBoard &board, std::vector<Mo
             if (((1ull << ind) & StartPieceBitboard::whitePawnBitboard) != 0) {
                 move.type = MoveType::PromotionSimple;
 
-                for (size_t piece = BlackPawn + 1; piece < PIECE_TYPE_LEN; ++piece) {
+                for (size_t piece = BlackPawn + 1; piece < BlackKing; ++piece) {
                     move.promotion_piece = static_cast<PieceType>(piece);
 
                     all_moves->push_back(move);
@@ -288,7 +288,7 @@ void MoveGenerator::GenerateBlackPawnMoves(const BitBoard &board, std::vector<Mo
             if (((1ull << ind) & StartPieceBitboard::whitePawnBitboard) != 0) {
                 move.type = MoveType::CapturePromotion;
 
-                for (size_t piece = BlackPawn + 1; piece < PIECE_TYPE_LEN; ++piece) {
+                for (size_t piece = BlackPawn + 1; piece < BlackKing; ++piece) {
                     move.promotion_piece = static_cast<PieceType>(piece);
 
                     all_moves->push_back(move);
@@ -319,7 +319,7 @@ void MoveGenerator::GenerateBlackPawnMoves(const BitBoard &board, std::vector<Mo
             if (((1ull << ind) & StartPieceBitboard::whitePawnBitboard) != 0) {
                 move.type = MoveType::CapturePromotion;
 
-                for (size_t piece = BlackPawn + 1; piece < PIECE_TYPE_LEN; ++piece) {
+                for (size_t piece = BlackPawn + 1; piece < BlackKing; ++piece) {
                     move.promotion_piece = static_cast<PieceType>(piece);
 
                     all_moves->push_back(move);
