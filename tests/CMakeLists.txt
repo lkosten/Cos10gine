@@ -6,7 +6,6 @@ set(HEADER_FILES
 
 set(SOURCE_FILES
         catch/catch_amalgamated.cpp
-        Test.cpp
         PerftTests.cpp
         )
 
