@@ -5,12 +5,15 @@
 #include "MoveGenerator.h"
 #include "BoardRayIterator.h"
 
+std::vector<std::vector<bitboard>> MoveGenerator::kPawnPushesPattern;
+std::vector<std::vector<bitboard>> MoveGenerator::kPawnAttacksPattern;
+
 std::vector<Move> MoveGenerator::GenerateMoves(const BitBoard& board, PlayerColor player) {
     std::vector<Move> all_moves;
 
     if (player == PlayerColor::PLAYER_NUMBER && board.GetPlayerToMove() == PlayerColor::White
         || player == PlayerColor::White) {
-        GenerateWhitePawnMoves(board, &all_moves);
+        GeneratePawnMoves(board, &all_moves, PlayerColor::White);
         GenerateWhiteKnightMoves(board, &all_moves);
         GenerateBishopMoves(board, &all_moves, PlayerColor::White);
         GenerateRookMoves(board, &all_moves, PlayerColor::White);
@@ -18,7 +21,7 @@ std::vector<Move> MoveGenerator::GenerateMoves(const BitBoard& board, PlayerColo
         GenerateKingMoves(board, &all_moves, PlayerColor::White);
     }
     else {
-        GenerateBlackPawnMoves(board, &all_moves);
+        GeneratePawnMoves(board, &all_moves, PlayerColor::Black);
         GenerateBlackKnightMoves(board, &all_moves);
         GenerateBishopMoves(board, &all_moves, PlayerColor::Black);
         GenerateRookMoves(board, &all_moves, PlayerColor::Black);
@@ -56,317 +59,102 @@ bitboard MoveGenerator::GenerateWhiteOccupiedPositions(const BitBoard &board) {
     return occupied;
 }
 
-void MoveGenerator::GenerateWhitePawnMoves(const BitBoard &board, std::vector<Move> *all_moves) {
-    bitboard occupied_positions = GenerateOccupiedPositions(board);
-    bitboard black_occupied_positions = GenerateBlackOccupiedPositions(board);
+void MoveGenerator::GeneratePawnMoves(const BitBoard &board, std::vector<Move> *all_moves, PlayerColor player) {
+    GeneratePawnPrecomputePatterns();
 
-    for (std::uint8_t ind = 0; ind < 64; ++ind) {
-        if (((board.GetPiecePositions(PieceType::WhitePawn) >> ind) & 1) == 0) {
-            continue;
-        }
+    bitboard opponent_occupancy = (player == PlayerColor::White ?
+                                   GenerateBlackOccupiedPositions(board) : GenerateWhiteOccupiedPositions(board));
+    bitboard board_occupancy = GenerateOccupiedPositions(board);
 
-        // one square push
-        if ((occupied_positions & (1ull << (ind + 8))) == 0) {
-            Move move{};
-            move.source_square = ind;
-            move.target_square = ind + 8;
+    bitboard pawns = board.GetPiecePositions(static_cast<PieceType>(player * 6 + WhitePawn));
 
-            move.type = MoveSimple;
+    while(pawns) {
+        bitboard pos_bb = BoardRayIterator::LS1B(pawns);
+        squareInd pos = BoardRayIterator::MS1BInd(pos_bb);
 
-            move.source_piece = WhitePawn;
-            move.target_piece = WhitePawn;
+        pawns ^= pos_bb;
 
-            // promotion
-            if (((1ull << ind) & StartPieceBitboard::blackPawnBitboard) != 0) {
-                move.type = MoveType::PromotionSimple;
+        bitboard pushes = kPawnPushesPattern[player][pos];
 
-                for (size_t piece = 1; piece < WhiteKing; ++piece) {
-                    move.promotion_piece = static_cast<PieceType>(piece);
+        while(pushes) {
+            bitboard push_square_bb =
+                    (player == PlayerColor::White ? BoardRayIterator::LS1B(pushes)
+                     : BoardRayIterator::MS1B(pushes));
+            pushes ^= push_square_bb;
 
+            if ((push_square_bb & board_occupancy) == 0) {
+                Move move{};
+
+                move.source_square = pos;
+                move.target_square = BoardRayIterator::MS1BInd(push_square_bb);
+
+                move.source_piece = static_cast<PieceType>(player * 6 + WhitePawn);
+                move.target_piece = static_cast<PieceType>(player * 6 + WhitePawn);
+
+                if ((pos_bb & (player == PlayerColor::White ? BitBoard::k7RankBitboard : BitBoard::k2RankBitboard)) == 0) {
+                    move.type = MoveSimple;
                     all_moves->push_back(move);
                 }
+                else {
+                    move.type = PromotionSimple;
+
+                    for (size_t piece = 1 + player * 6; piece < player * 6 + WhiteKing; ++piece) {
+                        move.promotion_piece = static_cast<PieceType>(piece);
+
+                        all_moves->push_back(move);
+                    }
+                }
             }
-            else { // non promotion
-                move.type = MoveType::MoveSimple;
+            else {
+                break;
+            }
+        }
+
+        bitboard attacks = kPawnAttacksPattern[player][pos];
+        while(attacks) {
+            bitboard attack_square_bb = BoardRayIterator::LS1B(attacks);
+            attacks ^= attack_square_bb;
+
+            if ((attack_square_bb & opponent_occupancy) != 0) {
+                Move move{};
+
+                move.source_square = pos;
+                move.target_square = BoardRayIterator::MS1BInd(attack_square_bb);
+
+                move.type = CaptureSimple;
+
+                move.source_piece = static_cast<PieceType>(player * 6 + WhitePawn);
+                move.target_piece = board.GetPieceTypeBySquare(attack_square_bb);
+
+                if ((pos_bb & (player == PlayerColor::White ? BitBoard::k7RankBitboard : BitBoard::k2RankBitboard)) == 0) {
+                    move.type = CaptureSimple;
+                    all_moves->push_back(move);
+                }
+                else {
+                    move.type = CapturePromotion;
+
+                    for (size_t piece = 1 + player * 6; piece < player * 6 + WhiteKing; ++piece) {
+                        move.promotion_piece = static_cast<PieceType>(piece);
+
+                        all_moves->push_back(move);
+                    }
+                }
+            }
+            else if ((attack_square_bb & (1ull << board.GetEnPassantAttackSquare())) != 0) {
+                Move move{};
+
+                move.source_square = pos;
+                move.target_square = BoardRayIterator::MS1BInd(attack_square_bb);
+
+                move.type = CaptureEnPassant;
+
+                move.source_piece = static_cast<PieceType>(player * 6 + WhitePawn);
+                move.target_piece = static_cast<PieceType>(!player * 6 + WhitePawn);
+
                 move.promotion_piece = WhitePawn;
 
                 all_moves->push_back(move);
             }
-        }
-
-        // two squares push
-        if ((StartPieceBitboard::whitePawnBitboard & (1ull << ind)) != 0
-            && (occupied_positions & (1ull << (ind + 8))) == 0
-            && (occupied_positions & (1ull << (ind + 16))) == 0) {
-
-            Move move{};
-            move.source_square = ind;
-            move.target_square = ind + 16;
-
-            move.type = MoveSimple;
-
-            move.source_piece = WhitePawn;
-            move.target_piece = WhitePawn;
-
-            move.promotion_piece = WhitePawn;
-
-            all_moves->push_back(move);
-        }
-
-        // left diagonal capture
-        if (((1ull << ind) & BitBoard::kAFileBitboard) == 0
-            && ((1ull << (ind + 7)) & black_occupied_positions) != 0) {
-
-            Move move{};
-            move.source_square = ind;
-            move.target_square = ind + 7;
-
-            move.type = MoveType::CaptureSimple;
-
-            move.source_piece = WhitePawn;
-            move.target_piece = board.GetPieceTypeBySquare(move.target_square);
-
-            // promotion capture
-            if (((1ull << ind) & StartPieceBitboard::blackPawnBitboard) != 0) {
-                move.type = MoveType::CapturePromotion;
-
-                for (size_t piece = 1; piece < WhiteKing; ++piece) {
-                    move.promotion_piece = static_cast<PieceType>(piece);
-
-                    all_moves->push_back(move);
-                }
-            }
-            else { // non promotion
-                move.type = MoveType::CaptureSimple;
-                move.promotion_piece = WhitePawn;
-
-                all_moves->push_back(move);
-            }
-        }
-
-        // right diagonal capture
-        if (((1ull << ind) & BitBoard::kHFileBitboard) == 0
-            && ((1ull << (ind + 9)) & black_occupied_positions) != 0) {
-
-            Move move{};
-            move.source_square = ind;
-            move.target_square = ind + 9;
-
-            move.type = MoveType::CaptureSimple;
-
-            move.source_piece = WhitePawn;
-            move.target_piece = board.GetPieceTypeBySquare(move.target_square);
-
-            // promotion capture
-            if (((1ull << ind) & StartPieceBitboard::blackPawnBitboard) != 0) {
-                move.type = MoveType::CapturePromotion;
-
-                for (size_t piece = 1; piece < WhiteKing; ++piece) {
-                    move.promotion_piece = static_cast<PieceType>(piece);
-
-                    all_moves->push_back(move);
-                }
-            }
-            else { // non promotion
-                move.type = MoveType::CaptureSimple;
-                move.promotion_piece = WhitePawn;
-
-                all_moves->push_back(move);
-            }
-        }
-
-        // left en passant
-        if (((1ull << ind) & BitBoard::kAFileBitboard) == 0
-            && board.GetEnPassantAttackSquare() == ind + 7) {
-
-            Move move{};
-            move.source_square = ind;
-            move.target_square = ind + 7;
-
-            move.type = MoveType::CaptureEnPassant;
-
-            move.source_piece = WhitePawn;
-            move.target_piece = BlackPawn;
-
-            move.promotion_piece = WhitePawn;
-
-            all_moves->push_back(move);
-        }
-
-        // right en passant
-        if (((1ull << ind) & BitBoard::kHFileBitboard) == 0
-            && board.GetEnPassantAttackSquare() == ind + 9) {
-
-            Move move{};
-            move.source_square = ind;
-            move.target_square = ind + 9;
-
-            move.type = MoveType::CaptureEnPassant;
-
-            move.source_piece = WhitePawn;
-            move.target_piece = BlackPawn;
-
-            move.promotion_piece = WhitePawn;
-
-            all_moves->push_back(move);
-        }
-    }
-}
-
-void MoveGenerator::GenerateBlackPawnMoves(const BitBoard &board, std::vector<Move> *all_moves) {
-    bitboard occupied_positions = GenerateOccupiedPositions(board);
-    bitboard white_occupied_positions = GenerateWhiteOccupiedPositions(board);
-
-    for (std::uint8_t ind = 0; ind < 64; ++ind) {
-        if (((board.GetPiecePositions(PieceType::BlackPawn) >> ind) & 1) == 0) {
-            continue;
-        }
-
-        // one square push
-        if ((occupied_positions & (1ull << (ind - 8))) == 0) {
-            Move move{};
-            move.source_square = ind;
-            move.target_square = ind - 8;
-
-            move.type = MoveSimple;
-
-            move.source_piece = BlackPawn;
-            move.target_piece = BlackPawn;
-
-            // promotion
-            if (((1ull << ind) & StartPieceBitboard::whitePawnBitboard) != 0) {
-                move.type = MoveType::PromotionSimple;
-
-                for (size_t piece = BlackPawn + 1; piece < BlackKing; ++piece) {
-                    move.promotion_piece = static_cast<PieceType>(piece);
-
-                    all_moves->push_back(move);
-                }
-            }
-            else { // non promotion
-                move.type = MoveType::MoveSimple;
-                move.promotion_piece = BlackPawn;
-
-                all_moves->push_back(move);
-            }
-
-        }
-
-        // two squares push
-        if ((StartPieceBitboard::blackPawnBitboard & (1ull << ind)) != 0
-            && (occupied_positions & (1ull << (ind - 8))) == 0
-            && (occupied_positions & (1ull << (ind - 16))) == 0) {
-
-            Move move{};
-            move.source_square = ind;
-            move.target_square = ind - 16;
-
-            move.type = MoveSimple;
-
-            move.source_piece = BlackPawn;
-            move.target_piece = BlackPawn;
-
-            move.promotion_piece = BlackPawn;
-
-            all_moves->push_back(move);
-        }
-
-        // left diagonal capture
-        if (((1ull << ind) & BitBoard::kAFileBitboard) == 0
-            && ((1ull << (ind - 9)) & white_occupied_positions) != 0) {
-
-            Move move{};
-            move.source_square = ind;
-            move.target_square = ind - 9;
-
-            move.type = MoveType::CaptureSimple;
-
-            move.source_piece = BlackPawn;
-            move.target_piece = board.GetPieceTypeBySquare(move.target_square);
-
-            // promotion capture
-            if (((1ull << ind) & StartPieceBitboard::whitePawnBitboard) != 0) {
-                move.type = MoveType::CapturePromotion;
-
-                for (size_t piece = BlackPawn + 1; piece < BlackKing; ++piece) {
-                    move.promotion_piece = static_cast<PieceType>(piece);
-
-                    all_moves->push_back(move);
-                }
-            }
-            else { // non promotion
-                move.type = MoveType::CaptureSimple;
-                move.promotion_piece = BlackPawn;
-
-                all_moves->push_back(move);
-            }
-        }
-
-        // right diagonal capture
-        if (((1ull << ind) & BitBoard::kHFileBitboard) == 0
-            && ((1ull << (ind - 7)) & white_occupied_positions) != 0) {
-
-            Move move{};
-            move.source_square = ind;
-            move.target_square = ind - 7;
-
-            move.type = MoveType::CaptureSimple;
-
-            move.source_piece = BlackPawn;
-            move.target_piece = board.GetPieceTypeBySquare(move.target_square);
-
-            // promotion capture
-            if (((1ull << ind) & StartPieceBitboard::whitePawnBitboard) != 0) {
-                move.type = MoveType::CapturePromotion;
-
-                for (size_t piece = BlackPawn + 1; piece < BlackKing; ++piece) {
-                    move.promotion_piece = static_cast<PieceType>(piece);
-
-                    all_moves->push_back(move);
-                }
-            }
-            else { // non promotion
-                move.type = MoveType::CaptureSimple;
-                move.promotion_piece = BlackPawn;
-
-                all_moves->push_back(move);
-            }
-        }
-
-        // left en passant
-        if (((1ull << ind) & BitBoard::kAFileBitboard) == 0
-            && board.GetEnPassantAttackSquare() == ind - 9) {
-
-            Move move{};
-            move.source_square = ind;
-            move.target_square = ind - 9;
-
-            move.type = MoveType::CaptureEnPassant;
-
-            move.source_piece = BlackPawn;
-            move.target_piece = WhitePawn;
-
-            move.promotion_piece = BlackPawn;
-
-            all_moves->push_back(move);
-        }
-
-        // right en passant
-        if (((1ull << ind) & BitBoard::kHFileBitboard) == 0
-            && board.GetEnPassantAttackSquare() == ind - 7) {
-
-            Move move{};
-            move.source_square = ind;
-            move.target_square = ind - 7;
-
-            move.type = MoveType::CaptureEnPassant;
-
-            move.source_piece = BlackPawn;
-            move.target_piece = WhitePawn;
-
-            move.promotion_piece = BlackPawn;
-
-            all_moves->push_back(move);
         }
     }
 }
@@ -450,7 +238,6 @@ void MoveGenerator::GenerateBlackKnightMoves(const BitBoard &board, std::vector<
         }
     }
 }
-
 
 std::vector<std::uint8_t> MoveGenerator::GenerateKnightAttackPattern(std::uint8_t knight_pos) {
     std::vector<std::uint8_t> attack_pattern;
@@ -836,4 +623,65 @@ bool MoveGenerator::IsKingInCheck(const BitBoard &board, PlayerColor player) {
             MoveGenerator::GeneratePlayerAttacks(board,
                                                  player == PlayerColor::White ? PlayerColor::Black : PlayerColor::White);
     return (opponent_attacks & board.GetPiecePositions(static_cast<PieceType>(WhiteKing + 6 * player))) != 0;
+}
+
+void MoveGenerator::GeneratePawnPrecomputePatterns() {
+    if (kPawnPushesPattern.size() == 2) {
+        return;
+    }
+
+    kPawnPushesPattern.assign(PLAYER_NUMBER, std::vector<bitboard>(64, 0));
+    kPawnAttacksPattern.assign(PLAYER_NUMBER, std::vector<bitboard>(64, 0));
+
+    for (squareInd square = 0; square < 64; ++square) {
+        bitboard square_bb = (1ull << square);
+
+        bitboard pushes_bb = 0;
+        bitboard attacks_bb = 0;
+
+        if ((square_bb & BitBoard::k8RankBitboard) == 0) {
+            pushes_bb |= (square_bb << 8);
+        }
+        if ((square_bb & BitBoard::k2RankBitboard) != 0) {
+            pushes_bb |= (square_bb << 16);
+        }
+
+        if ((square_bb & BitBoard::k8RankBitboard) == 0
+            && (square_bb & BitBoard::kAFileBitboard) == 0) {
+            attacks_bb |= (square_bb << 7);
+        }
+        if ((square_bb & BitBoard::k8RankBitboard) == 0
+            && (square_bb & BitBoard::kHFileBitboard) == 0) {
+            attacks_bb |= (square_bb << 9);
+        }
+
+        kPawnPushesPattern[PlayerColor::White][square] = pushes_bb;
+        kPawnAttacksPattern[PlayerColor::White][square] = attacks_bb;
+    }
+
+    for (squareInd square = 0; square < 64; ++square) {
+        bitboard square_bb = (1ull << square);
+
+        bitboard pushes_bb = 0;
+        bitboard attacks_bb = 0;
+
+        if ((square_bb & BitBoard::k1RankBitboard) == 0) {
+            pushes_bb |= (square_bb >> 8);
+        }
+        if ((square_bb & BitBoard::k7RankBitboard) != 0) {
+            pushes_bb |= (square_bb >> 16);
+        }
+
+        if ((square_bb & BitBoard::k1RankBitboard) == 0
+            && (square_bb & BitBoard::kAFileBitboard) == 0) {
+            attacks_bb |= (square_bb >> 9);
+        }
+        if ((square_bb & BitBoard::k1RankBitboard) == 0
+            && (square_bb & BitBoard::kHFileBitboard) == 0) {
+            attacks_bb |= (square_bb >> 7);
+        }
+
+        kPawnPushesPattern[PlayerColor::Black][square] = pushes_bb;
+        kPawnAttacksPattern[PlayerColor::Black][square] = attacks_bb;
+    }
 }

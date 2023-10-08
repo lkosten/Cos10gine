@@ -52,12 +52,11 @@ private:
     static bitboard GenerateBlackOccupiedPositions(const BitBoard &board);
     static bitboard GenerateWhiteOccupiedPositions(const BitBoard &board);
 
-    static void GenerateWhitePawnMoves(const BitBoard &board, std::vector<Move> *all_moves);
     static void GenerateWhiteKnightMoves(const BitBoard &board, std::vector<Move> *all_moves);
 
-    static void GenerateBlackPawnMoves(const BitBoard &board, std::vector<Move> *all_moves);
     static void GenerateBlackKnightMoves(const BitBoard &board, std::vector<Move> *all_moves);
 
+    static void GeneratePawnMoves(const BitBoard &board, std::vector<Move> *all_moves, PlayerColor player);
     static void GenerateBishopMoves(const BitBoard &board, std::vector<Move> *all_moves, PlayerColor player);
     static void GenerateRookMoves(const BitBoard &board, std::vector<Move> *all_moves, PlayerColor player);
     static void GenerateQueenMoves(const BitBoard &board, std::vector<Move> *all_moves, PlayerColor player);
@@ -65,6 +64,10 @@ private:
 
     static std::vector<std::uint8_t> GenerateKnightAttackPattern(std::uint8_t knight_pos);
     static std::vector<std::uint8_t> GenerateKingAttackPattern(std::uint8_t king_pos);
+
+    static void GeneratePawnPrecomputePatterns();
+    static std::vector<std::vector<bitboard>> kPawnPushesPattern;
+    static std::vector<std::vector<bitboard>> kPawnAttacksPattern;
 };
 
 
