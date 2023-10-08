@@ -211,3 +211,25 @@ TEST_CASE("Position 6 perft", "[perft]") {
     REQUIRE(calc_perft[2].all_moves == right_perft[2].all_moves);
     REQUIRE(calc_perft[3].all_moves == right_perft[3].all_moves);
 }
+
+TEST_CASE("Start position perft long", "[perft long]") {
+    std::map<size_t, PerftResults> right_perft = {
+            {1, {20,        0,       0,    0, 0, 0}},
+            {2, {400,       0,       0,    0, 0, 0}},
+            {3, {8902,      34,      0,    0, 0, 12}},
+            {4, {197281,    1576,    0,    0, 0, 469}},
+            {5, {4865609,   82719,   258,  0, 0, 27351}},
+            {6, {119060324, 2812008, 5248, 0, 0, 809099}},
+    };
+
+    std::map<size_t, PerftResults> calc_perft;
+    ChessGame game;
+    PlayFromPosition(&game, &calc_perft, 1, 6);
+
+    REQUIRE(calc_perft[1] == right_perft[1]);
+    REQUIRE(calc_perft[2] == right_perft[2]);
+    REQUIRE(calc_perft[3] == right_perft[3]);
+    REQUIRE(calc_perft[4] == right_perft[4]);
+    REQUIRE(calc_perft[5] == right_perft[5]);
+    REQUIRE(calc_perft[6] == right_perft[6]);
+}
