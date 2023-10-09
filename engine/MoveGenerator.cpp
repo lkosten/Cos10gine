@@ -305,11 +305,10 @@ void MoveGenerator::GenerateQueenMoves(const BitBoard &board, std::vector<Move> 
     bitboard ally_occupancy = (player == PlayerColor::White ?
                                GenerateWhiteOccupiedPositions(board) : GenerateBlackOccupiedPositions(board));
 
-    bitboard queen = board.GetPiecePositions(static_cast<PieceType>(player * 6 + WhiteQueen));
-
-    while(queen) {
-        bitboard pos_bb = BoardRayIterator::LS1B(queen);
-        queen ^= pos_bb;
+    bitboard queens = board.GetPiecePositions(static_cast<PieceType>(player * 6 + WhiteQueen));
+    while(queens) {
+        bitboard pos_bb = BoardRayIterator::LS1B(queens);
+        queens ^= pos_bb;
 
         BoardRayIterator it;
         int dir = RayDirection::E;
@@ -439,11 +438,131 @@ void MoveGenerator::GenerateKingMoves(const BitBoard &board, std::vector<Move> *
 }
 
 bitboard MoveGenerator::GeneratePlayerAttacks(const BitBoard& board, PlayerColor player) {
-    std::vector<Move> moves = GenerateMoves(board, player);
-
     bitboard attacks_bb = 0;
-    for (const auto &move : moves) {
-        attacks_bb |= (1ull << move.target_square);
+
+    // Pawns
+    bitboard pawns = board.GetPiecePositions(static_cast<PieceType>(player * 6 + WhitePawn));
+    while(pawns) {
+        bitboard pos_bb = BoardRayIterator::LS1B(pawns);
+        squareInd pos = BoardRayIterator::MS1BInd(pos_bb);
+
+        pawns ^= pos_bb;
+
+        bitboard pawn_attacks_bb = PrecomputedPiecePatterns::GetPawnAttackPattern(player, pos);
+        attacks_bb |= pawn_attacks_bb;
+    }
+
+    // Knights
+    bitboard knights = board.GetPiecePositions(static_cast<PieceType>(player * 6 + WhiteKnight));
+    while(knights) {
+        bitboard pos_bb = BoardRayIterator::LS1B(knights);
+        squareInd pos = BoardRayIterator::MS1BInd(pos_bb);
+
+        knights ^= pos_bb;
+
+        bitboard knight_attacks_bb = PrecomputedPiecePatterns::GetKnightAttackPattern(pos);
+        attacks_bb |= knight_attacks_bb;
+    }
+
+    // King
+    {
+        bitboard king = board.GetPiecePositions(static_cast<PieceType>(player * 6 + WhiteKing));
+        squareInd pos = BoardRayIterator::MS1BInd(king);
+
+        bitboard king_attacks_bb = PrecomputedPiecePatterns::GetKingAttackPattern(pos);
+        attacks_bb |= king_attacks_bb;
+    }
+
+    bitboard opponent_occupancy = (player == PlayerColor::White ?
+                                   GenerateBlackOccupiedPositions(board) : GenerateWhiteOccupiedPositions(board));
+    bitboard ally_occupancy = (player == PlayerColor::White ?
+                               GenerateWhiteOccupiedPositions(board) : GenerateBlackOccupiedPositions(board));
+
+    // Bishops
+    bitboard bishops = board.GetPiecePositions(static_cast<PieceType>(player * 6 + WhiteBishop));
+    while(bishops) {
+        bitboard pos_bb = BoardRayIterator::LS1B(bishops);
+        bishops ^= pos_bb;
+
+        BoardRayIterator it;
+        int dir = RayDirection::NE;
+        while(dir < RayDirection::NUMBER_OF_DIRECTIONS) {
+            it.SetBoardRay(pos_bb, static_cast<RayDirection>(dir));
+            while(bitboard next_attack = it.GetNextRaySquareBitboard()) {
+                // empty square
+                if ((next_attack & (opponent_occupancy | ally_occupancy)) == 0) {
+                    attacks_bb |= next_attack;
+                }
+                // attack
+                else if ((next_attack & opponent_occupancy) != 0) {
+                    attacks_bb |= next_attack;
+                    break;
+                }
+                    // ally blocker
+                else if ((next_attack & ally_occupancy) != 0) {
+                    break;
+                }
+            }
+            dir += 2;
+        }
+    }
+
+    // Rooks
+    bitboard rooks = board.GetPiecePositions(static_cast<PieceType>(player * 6 + WhiteRook));
+    while (rooks) {
+        bitboard pos_bb = BoardRayIterator::LS1B(rooks);
+        rooks ^= pos_bb;
+
+        BoardRayIterator it;
+        int dir = RayDirection::E;
+        while(dir < RayDirection::NUMBER_OF_DIRECTIONS) {
+            it.SetBoardRay(pos_bb, static_cast<RayDirection>(dir));
+            while(bitboard next_attack = it.GetNextRaySquareBitboard()) {
+                // empty square
+                if ((next_attack & (opponent_occupancy | ally_occupancy)) == 0) {
+                    attacks_bb |= next_attack;
+                }
+                    // attack
+                else if ((next_attack & opponent_occupancy) != 0) {
+                    attacks_bb |= next_attack;
+                    break;
+                }
+                    // ally blocker
+                else if ((next_attack & ally_occupancy) != 0) {
+                    break;
+                }
+            }
+            dir += 2;
+        }
+    }
+
+    // Queens
+    bitboard queens = board.GetPiecePositions(static_cast<PieceType>(player * 6 + WhiteQueen));
+    while(queens) {
+        bitboard pos_bb = BoardRayIterator::LS1B(queens);
+        queens ^= pos_bb;
+
+        BoardRayIterator it;
+        int dir = RayDirection::E;
+        while(dir < RayDirection::NUMBER_OF_DIRECTIONS) {
+            it.SetBoardRay(pos_bb, static_cast<RayDirection>(dir));
+            while(bitboard next_attack = it.GetNextRaySquareBitboard()) {
+                // empty square
+                if ((next_attack & (opponent_occupancy | ally_occupancy)) == 0) {
+                    attacks_bb |= next_attack;
+                }
+                    // attack
+                else if ((next_attack & opponent_occupancy) != 0) {
+                    attacks_bb |= next_attack;
+                    break;
+                }
+                    // ally blocker
+                else if ((next_attack & ally_occupancy) != 0) {
+                    break;
+                }
+            }
+            ++dir;
+        }
     }
 
     return attacks_bb;

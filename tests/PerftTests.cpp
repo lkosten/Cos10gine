@@ -82,7 +82,6 @@ void PlayFromPosition(ChessGame *perft_test_game, std::map<size_t, PerftResults>
                 case MOVE_TYPE_LEN:
                 default:
                     throw std::runtime_error("Wrong move type\n");
-                    break;
             }
 
             if (MoveGenerator::IsKingInCheck(perft_test_game->GetLastBoard(),
@@ -147,12 +146,13 @@ TEST_CASE("Position 3 perft", "[perft]") {
 
     std::map<size_t, PerftResults> calc_perft;
     ChessGame game("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -");
-    PlayFromPosition(&game, &calc_perft, 1, 4);
+    PlayFromPosition(&game, &calc_perft, 1, 5);
 
     REQUIRE(calc_perft[1] == right_perft[1]);
     REQUIRE(calc_perft[2] == right_perft[2]);
     REQUIRE(calc_perft[3] == right_perft[3]);
     REQUIRE(calc_perft[4] == right_perft[4]);
+    REQUIRE(calc_perft[5] == right_perft[5]);
 }
 
 TEST_CASE("Position 4 perft", "[perft]") {
