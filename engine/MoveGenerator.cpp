@@ -4,9 +4,7 @@
 
 #include "MoveGenerator.h"
 #include "BoardRayIterator.h"
-
-std::vector<std::vector<bitboard>> MoveGenerator::kPawnPushesPattern;
-std::vector<std::vector<bitboard>> MoveGenerator::kPawnAttacksPattern;
+#include "PrecomputedPiecePatterns.h"
 
 std::vector<Move> MoveGenerator::GenerateMoves(const BitBoard& board, PlayerColor player) {
     std::vector<Move> all_moves;
@@ -52,8 +50,6 @@ bitboard MoveGenerator::GenerateWhiteOccupiedPositions(const BitBoard &board) {
 }
 
 void MoveGenerator::GeneratePawnMoves(const BitBoard &board, std::vector<Move> *all_moves, PlayerColor player) {
-    GeneratePawnPrecomputePatterns();
-
     bitboard opponent_occupancy = (player == PlayerColor::White ?
                                    GenerateBlackOccupiedPositions(board) : GenerateWhiteOccupiedPositions(board));
     bitboard board_occupancy = GenerateOccupiedPositions(board);
@@ -66,7 +62,7 @@ void MoveGenerator::GeneratePawnMoves(const BitBoard &board, std::vector<Move> *
 
         pawns ^= pos_bb;
 
-        bitboard pushes = kPawnPushesPattern[player][pos];
+        bitboard pushes = PrecomputedPiecePatterns::GetPawnPushPattern(player, pos);
 
         while(pushes) {
             bitboard push_square_bb =
@@ -102,7 +98,7 @@ void MoveGenerator::GeneratePawnMoves(const BitBoard &board, std::vector<Move> *
             }
         }
 
-        bitboard attacks = kPawnAttacksPattern[player][pos];
+        bitboard attacks = PrecomputedPiecePatterns::GetPawnAttackPattern(player, pos);
         while(attacks) {
             bitboard attack_square_bb = BoardRayIterator::LS1B(attacks);
             attacks ^= attack_square_bb;
@@ -155,7 +151,7 @@ void MoveGenerator::GenerateKnightMoves(const BitBoard &board, std::vector<Move>
     bitboard ally_occupied_positions = (player == PlayerColor::White ? GenerateWhiteOccupiedPositions(board)
                                         : GenerateBlackOccupiedPositions(board));
     bitboard opponent_occupied_positions = (player == PlayerColor::Black ? GenerateWhiteOccupiedPositions(board)
-                                            : GenerateBlackOccupiedPositions(board));;
+                                            : GenerateBlackOccupiedPositions(board));
 
     bitboard knights = board.GetPiecePositions(static_cast<PieceType>(player * 6 + PieceType::WhiteKnight));
     while(knights) {
@@ -580,65 +576,4 @@ bool MoveGenerator::IsKingInCheck(const BitBoard &board, PlayerColor player) {
             MoveGenerator::GeneratePlayerAttacks(board,
                                                  player == PlayerColor::White ? PlayerColor::Black : PlayerColor::White);
     return (opponent_attacks & board.GetPiecePositions(static_cast<PieceType>(WhiteKing + 6 * player))) != 0;
-}
-
-void MoveGenerator::GeneratePawnPrecomputePatterns() {
-    if (kPawnPushesPattern.size() == 2) {
-        return;
-    }
-
-    kPawnPushesPattern.assign(PLAYER_NUMBER, std::vector<bitboard>(64, 0));
-    kPawnAttacksPattern.assign(PLAYER_NUMBER, std::vector<bitboard>(64, 0));
-
-    for (squareInd square = 0; square < 64; ++square) {
-        bitboard square_bb = (1ull << square);
-
-        bitboard pushes_bb = 0;
-        bitboard attacks_bb = 0;
-
-        if ((square_bb & BitBoard::k8RankBitboard) == 0) {
-            pushes_bb |= (square_bb << 8);
-        }
-        if ((square_bb & BitBoard::k2RankBitboard) != 0) {
-            pushes_bb |= (square_bb << 16);
-        }
-
-        if ((square_bb & BitBoard::k8RankBitboard) == 0
-            && (square_bb & BitBoard::kAFileBitboard) == 0) {
-            attacks_bb |= (square_bb << 7);
-        }
-        if ((square_bb & BitBoard::k8RankBitboard) == 0
-            && (square_bb & BitBoard::kHFileBitboard) == 0) {
-            attacks_bb |= (square_bb << 9);
-        }
-
-        kPawnPushesPattern[PlayerColor::White][square] = pushes_bb;
-        kPawnAttacksPattern[PlayerColor::White][square] = attacks_bb;
-    }
-
-    for (squareInd square = 0; square < 64; ++square) {
-        bitboard square_bb = (1ull << square);
-
-        bitboard pushes_bb = 0;
-        bitboard attacks_bb = 0;
-
-        if ((square_bb & BitBoard::k1RankBitboard) == 0) {
-            pushes_bb |= (square_bb >> 8);
-        }
-        if ((square_bb & BitBoard::k7RankBitboard) != 0) {
-            pushes_bb |= (square_bb >> 16);
-        }
-
-        if ((square_bb & BitBoard::k1RankBitboard) == 0
-            && (square_bb & BitBoard::kAFileBitboard) == 0) {
-            attacks_bb |= (square_bb >> 9);
-        }
-        if ((square_bb & BitBoard::k1RankBitboard) == 0
-            && (square_bb & BitBoard::kHFileBitboard) == 0) {
-            attacks_bb |= (square_bb >> 7);
-        }
-
-        kPawnPushesPattern[PlayerColor::Black][square] = pushes_bb;
-        kPawnAttacksPattern[PlayerColor::Black][square] = attacks_bb;
-    }
 }

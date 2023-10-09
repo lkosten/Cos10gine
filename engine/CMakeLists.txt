@@ -7,6 +7,7 @@ set(HEADER_FILES
         BoardRayIterator.h
         ChessGame.h
         ChessNotations/FEN.h
+        PrecomputedPiecePatterns.h
         )
 
 set(SOURCE_FILES
@@ -15,6 +16,6 @@ set(SOURCE_FILES
         BoardRayIterator.cpp
         ChessGame.cpp
         ChessNotations/FEN.cpp
-        )
+        PrecomputedPiecePatterns.cpp)
 
 add_library(ChessEngine_lib STATIC ${SOURCE_FILES} ${HEADER_FILES})

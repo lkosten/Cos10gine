@@ -61,10 +61,6 @@ private:
 
     static bitboard GenerateKnightAttackPattern(std::uint8_t knight_pos);
     static bitboard GenerateKingAttackPattern(std::uint8_t king_pos);
-
-    static void GeneratePawnPrecomputePatterns();
-    static std::vector<std::vector<bitboard>> kPawnPushesPattern;
-    static std::vector<std::vector<bitboard>> kPawnAttacksPattern;
 };
 
 
