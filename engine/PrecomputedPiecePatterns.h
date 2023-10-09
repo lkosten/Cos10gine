@@ -17,9 +17,10 @@ public:
     static bitboard GetKingAttackPattern(squareInd pos);
 
 private:
-    static void GeneratePawnPrecomputePatterns();
-    static void GenerateKnightPrecomputePatterns();
-    static void GenerateKingPrecomputePatterns();
+    static std::vector<std::vector<bitboard>> GeneratePawnPushesPrecomputePatterns();
+    static std::vector<std::vector<bitboard>> GeneratePawnAttacksPrecomputePatterns();
+    static std::vector<bitboard> GenerateKnightPrecomputePatterns();
+    static std::vector<bitboard> GenerateKingPrecomputePatterns();
 
     static std::vector<std::vector<bitboard>> kPawnPushesPattern;
     static std::vector<std::vector<bitboard>> kPawnAttacksPattern;

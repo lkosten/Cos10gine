@@ -4,24 +4,17 @@
 
 #include "PrecomputedPiecePatterns.h"
 
-std::vector<std::vector<bitboard>> PrecomputedPiecePatterns::kPawnPushesPattern;
-std::vector<std::vector<bitboard>> PrecomputedPiecePatterns::kPawnAttacksPattern;
-std::vector<bitboard> PrecomputedPiecePatterns::kKnightAttacksPattern;
-std::vector<bitboard> PrecomputedPiecePatterns::kKingAttacksPattern;
+std::vector<std::vector<bitboard>> PrecomputedPiecePatterns::kPawnPushesPattern = GeneratePawnPushesPrecomputePatterns();
+std::vector<std::vector<bitboard>> PrecomputedPiecePatterns::kPawnAttacksPattern = GeneratePawnAttacksPrecomputePatterns();
+std::vector<bitboard> PrecomputedPiecePatterns::kKnightAttacksPattern = GenerateKnightPrecomputePatterns();
+std::vector<bitboard> PrecomputedPiecePatterns::kKingAttacksPattern = GenerateKingPrecomputePatterns();
 
-void PrecomputedPiecePatterns::GeneratePawnPrecomputePatterns() {
-    if (kPawnPushesPattern.size() == 2) {
-        return;
-    }
-
-    kPawnPushesPattern.assign(PLAYER_NUMBER, std::vector<bitboard>(64, 0));
-    kPawnAttacksPattern.assign(PLAYER_NUMBER, std::vector<bitboard>(64, 0));
+std::vector<std::vector<bitboard>> PrecomputedPiecePatterns::GeneratePawnPushesPrecomputePatterns() {
+    std::vector<std::vector<bitboard>> pattern(PLAYER_NUMBER, std::vector<bitboard>(64, 0));
 
     for (squareInd square = 0; square < 64; ++square) {
         bitboard square_bb = (1ull << square);
-
         bitboard pushes_bb = 0;
-        bitboard attacks_bb = 0;
 
         if ((square_bb & BitBoard::k8RankBitboard) == 0) {
             pushes_bb |= (square_bb << 8);
@@ -29,6 +22,33 @@ void PrecomputedPiecePatterns::GeneratePawnPrecomputePatterns() {
         if ((square_bb & BitBoard::k2RankBitboard) != 0) {
             pushes_bb |= (square_bb << 16);
         }
+
+        pattern[PlayerColor::White][square] = pushes_bb;
+    }
+
+    for (squareInd square = 0; square < 64; ++square) {
+        bitboard square_bb = (1ull << square);
+        bitboard pushes_bb = 0;
+
+        if ((square_bb & BitBoard::k1RankBitboard) == 0) {
+            pushes_bb |= (square_bb >> 8);
+        }
+        if ((square_bb & BitBoard::k7RankBitboard) != 0) {
+            pushes_bb |= (square_bb >> 16);
+        }
+
+        pattern[PlayerColor::Black][square] = pushes_bb;
+    }
+
+    return pattern;
+}
+
+std::vector<std::vector<bitboard>> PrecomputedPiecePatterns::GeneratePawnAttacksPrecomputePatterns() {
+    std::vector<std::vector<bitboard>> pattern(PLAYER_NUMBER, std::vector<bitboard>(64, 0));
+
+    for (squareInd square = 0; square < 64; ++square) {
+        bitboard square_bb = (1ull << square);
+        bitboard attacks_bb = 0;
 
         if ((square_bb & BitBoard::k8RankBitboard) == 0
             && (square_bb & BitBoard::kAFileBitboard) == 0) {
@@ -39,22 +59,12 @@ void PrecomputedPiecePatterns::GeneratePawnPrecomputePatterns() {
             attacks_bb |= (square_bb << 9);
         }
 
-        kPawnPushesPattern[PlayerColor::White][square] = pushes_bb;
-        kPawnAttacksPattern[PlayerColor::White][square] = attacks_bb;
+        pattern[PlayerColor::White][square] = attacks_bb;
     }
 
     for (squareInd square = 0; square < 64; ++square) {
         bitboard square_bb = (1ull << square);
-
-        bitboard pushes_bb = 0;
         bitboard attacks_bb = 0;
-
-        if ((square_bb & BitBoard::k1RankBitboard) == 0) {
-            pushes_bb |= (square_bb >> 8);
-        }
-        if ((square_bb & BitBoard::k7RankBitboard) != 0) {
-            pushes_bb |= (square_bb >> 16);
-        }
 
         if ((square_bb & BitBoard::k1RankBitboard) == 0
             && (square_bb & BitBoard::kAFileBitboard) == 0) {
@@ -65,17 +75,14 @@ void PrecomputedPiecePatterns::GeneratePawnPrecomputePatterns() {
             attacks_bb |= (square_bb >> 7);
         }
 
-        kPawnPushesPattern[PlayerColor::Black][square] = pushes_bb;
-        kPawnAttacksPattern[PlayerColor::Black][square] = attacks_bb;
+        pattern[PlayerColor::Black][square] = attacks_bb;
     }
+
+    return pattern;
 }
 
-void PrecomputedPiecePatterns::GenerateKnightPrecomputePatterns() {
-    if (kKnightAttacksPattern.size() == 64) {
-        return;
-    }
-
-    kKnightAttacksPattern.assign(64, 0);
+std::vector<bitboard> PrecomputedPiecePatterns::GenerateKnightPrecomputePatterns() {
+    std::vector<bitboard> pattern(64, 0ull);
 
     for (squareInd square = 0; square < 64; ++square) {
         bitboard attack_pattern_bb = 0;
@@ -137,16 +144,14 @@ void PrecomputedPiecePatterns::GenerateKnightPrecomputePatterns() {
             attack_pattern_bb |= (knight_bb >> 15);
         }
 
-        kKnightAttacksPattern[square] = attack_pattern_bb;
+        pattern[square] = attack_pattern_bb;
     }
+
+    return pattern;
 }
 
-void PrecomputedPiecePatterns::GenerateKingPrecomputePatterns() {
-    if (kKingAttacksPattern.size() == 64) {
-        return;
-    }
-
-    kKingAttacksPattern.assign(64, 0);
+std::vector<bitboard> PrecomputedPiecePatterns::GenerateKingPrecomputePatterns() {
+    std::vector<bitboard> pattern(64, 0ull);
 
     for (squareInd square = 0; square < 64; ++square) {
         bitboard attack_pattern_bb = 0;
@@ -200,26 +205,24 @@ void PrecomputedPiecePatterns::GenerateKingPrecomputePatterns() {
             attack_pattern_bb |= (king_bb >> 7);
         }
 
-        kKingAttacksPattern[square] = attack_pattern_bb;
+        pattern[square] = attack_pattern_bb;
     }
+
+    return pattern;
 }
 
 bitboard PrecomputedPiecePatterns::GetKnightAttackPattern(squareInd pos) {
-    GenerateKnightPrecomputePatterns();
     return kKnightAttacksPattern[pos];
 }
 
 bitboard PrecomputedPiecePatterns::GetKingAttackPattern(squareInd pos) {
-    GenerateKingPrecomputePatterns();
     return kKingAttacksPattern[pos];
 }
 
 bitboard PrecomputedPiecePatterns::GetPawnPushPattern(PlayerColor player, squareInd pos) {
-    GeneratePawnPrecomputePatterns();
     return kPawnPushesPattern[player][pos];
 }
 
 bitboard PrecomputedPiecePatterns::GetPawnAttackPattern(PlayerColor player, squareInd pos) {
-    GeneratePawnPrecomputePatterns();
     return kPawnAttacksPattern[player][pos];
 }
