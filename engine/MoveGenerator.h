@@ -58,9 +58,6 @@ private:
     static void GenerateRookMoves(const BitBoard &board, std::vector<Move> *all_moves, PlayerColor player);
     static void GenerateQueenMoves(const BitBoard &board, std::vector<Move> *all_moves, PlayerColor player);
     static void GenerateKingMoves(const BitBoard &board, std::vector<Move> *all_moves, PlayerColor player);
-
-    static bitboard GenerateKnightAttackPattern(std::uint8_t knight_pos);
-    static bitboard GenerateKingAttackPattern(std::uint8_t king_pos);
 };
 
 

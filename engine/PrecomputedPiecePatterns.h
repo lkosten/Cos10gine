@@ -13,12 +13,18 @@ class PrecomputedPiecePatterns {
 public:
     static bitboard GetPawnPushPattern(PlayerColor player, squareInd pos);
     static bitboard GetPawnAttackPattern(PlayerColor player, squareInd pos);
+    static bitboard GetKnightAttackPattern(squareInd pos);
+    static bitboard GetKingAttackPattern(squareInd pos);
 
 private:
     static void GeneratePawnPrecomputePatterns();
+    static void GenerateKnightPrecomputePatterns();
+    static void GenerateKingPrecomputePatterns();
 
     static std::vector<std::vector<bitboard>> kPawnPushesPattern;
     static std::vector<std::vector<bitboard>> kPawnAttacksPattern;
+    static std::vector<bitboard> kKnightAttacksPattern;
+    static std::vector<bitboard> kKingAttacksPattern;
 };
 
 
