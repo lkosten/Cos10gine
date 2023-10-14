@@ -61,8 +61,6 @@ void BitBoard::DebugDraw(std::ostream &out) {
 }
 
 bool BitBoard::MakeMove(const Move &move) {
-    SetEnPassantRule(move);
-    SetCastlingRights(move);
     bitboard source_piece_board = (1ull << move.source_square);
     bitboard target_piece_board = (1ull << move.target_square);
 
@@ -123,6 +121,8 @@ bool BitBoard::MakeMove(const Move &move) {
 
     f_next_turn_player = static_cast<PlayerColor>(!f_next_turn_player);
 
+    SetEnPassantRule(move);
+    SetCastlingRights(move);
     return !MoveGenerator::IsKingInCheck(*this, static_cast<PlayerColor>(!f_next_turn_player));
 }
 
@@ -243,6 +243,19 @@ void BitBoard::SetCastlingRights(const Move &move) {
 
         default:
             break;
+    }
+
+    if ((f_board[WhiteRook] & 1) == 0) {
+        f_castling_rights.white_long_catle = false;
+    }
+    if ((f_board[WhiteRook] & (1ull << 7)) == 0) {
+        f_castling_rights.white_short_catle = false;
+    }
+    if ((f_board[BlackRook] & (1ull << 56)) == 0) {
+        f_castling_rights.black_long_catle = false;
+    }
+    if ((f_board[BlackRook] & (1ull << 63)) == 0) {
+        f_castling_rights.black_short_catle = false;
     }
 }
 

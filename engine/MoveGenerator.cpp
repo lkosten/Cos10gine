@@ -430,9 +430,9 @@ void MoveGenerator::GenerateKingMoves(const BitBoard &board, std::vector<Move> *
         if (opponent_attacks == 0) {
             opponent_attacks = GeneratePlayerAttacks(board, (player == PlayerColor::White ? PlayerColor::Black : PlayerColor::White));
         }
-        Move move{};
-
         if ((opponent_attacks & ((king_bb << 1) | (king_bb << 2) | king_bb)) == 0) {
+            Move move{};
+
             move.source_square = king_pos_ind;
             move.target_square = king_pos_ind + 2;
 
