@@ -79,6 +79,8 @@ public:
     static const bitboard k7RankBitboard = 0x00FF000000000000;
     static const bitboard k8RankBitboard = 0xFF00000000000000;
 
+    static const squareInd kNoEnPassantFlag = 200;
+
 private:
     bitboard f_board[PieceType::PIECE_TYPE_LEN];
     PlayerColor f_next_turn_player;
@@ -95,8 +97,6 @@ private:
 
     void SetEnPassantRule(const Move &move);
     void SetCastlingRights(const Move &move);
-
-    static const squareInd kNoEnPassantFlag = 64;
 
     friend class FEN;
 };
