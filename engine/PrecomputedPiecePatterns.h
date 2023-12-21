@@ -26,6 +26,12 @@ private:
     static std::vector<std::vector<bitboard>> kPawnAttacksPattern;
     static std::vector<bitboard> kKnightAttacksPattern;
     static std::vector<bitboard> kKingAttacksPattern;
+
+    static std::vector<uint64_t> kBishopMagicNumbers;
+    static std::vector<size_t> kBishopMagicNumberFreedomDegrees;
+
+    static std::vector<uint64_t> kRookMagicNumbers;
+    static std::vector<size_t> kRookMagicNumberFreedomDegrees;
 };
 
 
