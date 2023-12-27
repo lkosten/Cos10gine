@@ -12,12 +12,12 @@ std::vector<Move> MoveGenerator::GenerateMoves(const BitBoard& board, PlayerColo
         player = board.GetPlayerToMove();
     }
 
-    GeneratePawnMoves(board, &all_moves, player);
-    GenerateKnightMoves(board, &all_moves, player);
-    GenerateBishopMoves(board, &all_moves, player);
-    GenerateRookMoves(board, &all_moves, player);
-    GenerateQueenMoves(board, &all_moves, player);
-    GenerateKingMoves(board, &all_moves, player);
+    GeneratePieceMoves(board, &all_moves, player, static_cast<PieceType>(player * 6 + WhitePawn));
+    GeneratePieceMoves(board, &all_moves, player, static_cast<PieceType>(player * 6 + WhiteKnight));
+    GeneratePieceMoves(board, &all_moves, player, static_cast<PieceType>(player * 6 + WhiteBishop));
+    GeneratePieceMoves(board, &all_moves, player, static_cast<PieceType>(player * 6 + WhiteRook));
+    GeneratePieceMoves(board, &all_moves, player, static_cast<PieceType>(player * 6 + WhiteQueen));
+    GeneratePieceMoves(board, &all_moves, player, static_cast<PieceType>(player * 6 + WhiteKing));
 
     return all_moves;
 }
@@ -98,7 +98,8 @@ void MoveGenerator::GeneratePawnMoves(const BitBoard &board, std::vector<Move> *
             }
         }
 
-        bitboard attacks = PrecomputedPiecePatterns::GetPawnAttackPattern(player, pos);
+        bitboard attacks = PrecomputedPiecePatterns::GetPieceAttackPattern(
+                player, static_cast<PieceType>(player * 6 + WhitePawn), pos, 0ull);
         while(attacks) {
             bitboard attack_square_bb = BoardRayIterator::LS1B(attacks);
             attacks ^= attack_square_bb;
@@ -149,106 +150,27 @@ void MoveGenerator::GeneratePawnMoves(const BitBoard &board, std::vector<Move> *
     }
 }
 
-void MoveGenerator::GenerateKnightMoves(const BitBoard &board, std::vector<Move> *all_moves, PlayerColor player) {
-    bitboard ally_occupied_positions = (player == PlayerColor::White ? GenerateWhiteOccupiedPositions(board)
-                                        : GenerateBlackOccupiedPositions(board));
-    bitboard opponent_occupied_positions = (player == PlayerColor::Black ? GenerateWhiteOccupiedPositions(board)
-                                            : GenerateBlackOccupiedPositions(board));
-
-    bitboard knights = board.GetPiecePositions(static_cast<PieceType>(player * 6 + PieceType::WhiteKnight));
-    while(knights) {
-        squareInd ind = BoardRayIterator::MS1BInd(knights);
-        knights ^= (1ull << ind);
-
-        bitboard attack_pattern_bb = PrecomputedPiecePatterns::GetKnightAttackPattern(ind);
-        attack_pattern_bb &= ~ally_occupied_positions;
-        while(attack_pattern_bb) {
-            squareInd attack_square = BoardRayIterator::MS1BInd(attack_pattern_bb);
-            attack_pattern_bb ^= (1ull << attack_square);
-
-            if (((1ull << attack_square) & ally_occupied_positions) != 0) {
-                continue;
-            }
-
-            Move move{};
-            move.source_square = ind;
-            move.target_square = attack_square;
-
-            move.source_piece = static_cast<PieceType>(player * 6 + PieceType::WhiteKnight);
-
-            // capturing
-            if (((1ull << attack_square) & opponent_occupied_positions) != 0) {
-                move.type = CaptureSimple;
-                move.target_piece = board.GetPieceTypeBySquare(1ull << attack_square);
-
-                all_moves->push_back(move);
-            }
-            else { // simple move
-                move.type = MoveSimple;
-                move.target_piece = static_cast<PieceType>(player * 6 + PieceType::WhiteKnight);
-
-                all_moves->push_back(move);
-            }
-        }
+void MoveGenerator::GeneratePieceMoves(const BitBoard &board, std::vector<Move> *all_moves, PlayerColor player, PieceType piece) {
+    if (piece == WhitePawn || piece == BlackPawn) {
+        GeneratePawnMoves(board, all_moves, player);
+        return;
     }
-}
-
-void MoveGenerator::GenerateBishopMoves(const BitBoard &board, std::vector<Move> *all_moves, const PlayerColor player) {
-    bitboard opponent_occupancy = (player == PlayerColor::White ?
-            GenerateBlackOccupiedPositions(board) : GenerateWhiteOccupiedPositions(board));
-    bitboard ally_occupancy = (player == PlayerColor::White ?
-            GenerateWhiteOccupiedPositions(board) : GenerateBlackOccupiedPositions(board));
-
-    bitboard bishops = board.GetPiecePositions(static_cast<PieceType>(player * 6 + WhiteBishop));
-    while(bishops) {
-        squareInd bishop_square = BoardRayIterator::MS1BInd(bishops);
-        bishops ^= (1ull << bishop_square);
-
-        bitboard attack_pattern_bb = PrecomputedPiecePatterns::GetBishopAttackPattern(bishop_square, ally_occupancy | opponent_occupancy);
-        attack_pattern_bb &= ~ally_occupancy;
-        while(attack_pattern_bb) {
-            squareInd attack_square = BoardRayIterator::MS1BInd(attack_pattern_bb);
-            attack_pattern_bb ^= (1ull << attack_square);
-
-            if (((1ull << attack_square) & ally_occupancy) != 0) {
-                continue;
-            }
-
-            Move move{};
-            move.source_square = bishop_square;
-            move.target_square = attack_square;
-
-            move.source_piece = static_cast<PieceType>(player * 6 + PieceType::WhiteBishop);
-
-            // capturing
-            if (((1ull << attack_square) & opponent_occupancy) != 0) {
-                move.type = CaptureSimple;
-                move.target_piece = board.GetPieceTypeBySquare(1ull << attack_square);
-
-                all_moves->push_back(move);
-            }
-            else { // simple move
-                move.type = MoveSimple;
-                move.target_piece = static_cast<PieceType>(player * 6 + PieceType::WhiteBishop);
-
-                all_moves->push_back(move);
-            }
-        }
+    if (piece == WhiteKing || piece == BlackKing) {
+        GenerateCastleMoves(board, all_moves, player);
     }
-}
 
-void MoveGenerator::GenerateRookMoves(const BitBoard &board, std::vector<Move> *all_moves, PlayerColor player) {
     bitboard opponent_occupancy = (player == PlayerColor::White ?
                                    GenerateBlackOccupiedPositions(board) : GenerateWhiteOccupiedPositions(board));
     bitboard ally_occupancy = (player == PlayerColor::White ?
                                GenerateWhiteOccupiedPositions(board) : GenerateBlackOccupiedPositions(board));
 
-    bitboard bishops = board.GetPiecePositions(static_cast<PieceType>(player * 6 + WhiteRook));
-    while(bishops) {
-        squareInd bishop_square = BoardRayIterator::MS1BInd(bishops);
-        bishops ^= (1ull << bishop_square);
+    bitboard piece_bb = board.GetPiecePositions(piece);
+    while(piece_bb) {
+        squareInd piece_square = BoardRayIterator::MS1BInd(piece_bb);
+        piece_bb ^= (1ull << piece_square);
 
-        bitboard attack_pattern_bb = PrecomputedPiecePatterns::GetRookAttackPattern(bishop_square, ally_occupancy | opponent_occupancy);
+        bitboard attack_pattern_bb = PrecomputedPiecePatterns::GetPieceAttackPattern(player, piece, piece_square, ally_occupancy |
+                                                                                                   opponent_occupancy);
         attack_pattern_bb &= ~ally_occupancy;
         while(attack_pattern_bb) {
             squareInd attack_square = BoardRayIterator::MS1BInd(attack_pattern_bb);
@@ -259,10 +181,10 @@ void MoveGenerator::GenerateRookMoves(const BitBoard &board, std::vector<Move> *
             }
 
             Move move{};
-            move.source_square = bishop_square;
+            move.source_square = piece_square;
             move.target_square = attack_square;
 
-            move.source_piece = static_cast<PieceType>(player * 6 + PieceType::WhiteRook);
+            move.source_piece = piece;
 
             // capturing
             if (((1ull << attack_square) & opponent_occupancy) != 0) {
@@ -273,7 +195,7 @@ void MoveGenerator::GenerateRookMoves(const BitBoard &board, std::vector<Move> *
             }
             else { // simple move
                 move.type = MoveSimple;
-                move.target_piece = static_cast<PieceType>(player * 6 + PieceType::WhiteRook);
+                move.target_piece = piece;
 
                 all_moves->push_back(move);
             }
@@ -281,51 +203,7 @@ void MoveGenerator::GenerateRookMoves(const BitBoard &board, std::vector<Move> *
     }
 }
 
-void MoveGenerator::GenerateQueenMoves(const BitBoard &board, std::vector<Move> *all_moves, PlayerColor player) {
-    bitboard opponent_occupancy = (player == PlayerColor::White ?
-                                   GenerateBlackOccupiedPositions(board) : GenerateWhiteOccupiedPositions(board));
-    bitboard ally_occupancy = (player == PlayerColor::White ?
-                               GenerateWhiteOccupiedPositions(board) : GenerateBlackOccupiedPositions(board));
-
-    bitboard bishops = board.GetPiecePositions(static_cast<PieceType>(player * 6 + WhiteQueen));
-    while(bishops) {
-        squareInd bishop_square = BoardRayIterator::MS1BInd(bishops);
-        bishops ^= (1ull << bishop_square);
-
-        bitboard attack_pattern_bb = PrecomputedPiecePatterns::GetQueenAttackPattern(bishop_square, ally_occupancy | opponent_occupancy);
-        attack_pattern_bb &= ~ally_occupancy;
-        while(attack_pattern_bb) {
-            squareInd attack_square = BoardRayIterator::MS1BInd(attack_pattern_bb);
-            attack_pattern_bb ^= (1ull << attack_square);
-
-            if (((1ull << attack_square) & ally_occupancy) != 0) {
-                continue;
-            }
-
-            Move move{};
-            move.source_square = bishop_square;
-            move.target_square = attack_square;
-
-            move.source_piece = static_cast<PieceType>(player * 6 + PieceType::WhiteQueen);
-
-            // capturing
-            if (((1ull << attack_square) & opponent_occupancy) != 0) {
-                move.type = CaptureSimple;
-                move.target_piece = board.GetPieceTypeBySquare(1ull << attack_square);
-
-                all_moves->push_back(move);
-            }
-            else { // simple move
-                move.type = MoveSimple;
-                move.target_piece = static_cast<PieceType>(player * 6 + PieceType::WhiteQueen);
-
-                all_moves->push_back(move);
-            }
-        }
-    }
-}
-
-void MoveGenerator::GenerateKingMoves(const BitBoard &board, std::vector<Move> *all_moves, PlayerColor player) {
+void MoveGenerator::GenerateCastleMoves(const BitBoard &board, std::vector<Move> *all_moves, PlayerColor player) {
     bitboard opponent_occupancy = (player == PlayerColor::White ?
                                    GenerateBlackOccupiedPositions(board) : GenerateWhiteOccupiedPositions(board));
     bitboard ally_occupancy = (player == PlayerColor::White ?
@@ -336,37 +214,6 @@ void MoveGenerator::GenerateKingMoves(const BitBoard &board, std::vector<Move> *
         return;
     }
     squareInd king_pos_ind = BoardRayIterator::MS1BInd(king_bb);
-
-    bitboard attack_pattern_bb = PrecomputedPiecePatterns::GetKingAttackPattern(king_pos_ind);
-    while (attack_pattern_bb) {
-        squareInd attack_square = BoardRayIterator::MS1BInd(attack_pattern_bb);
-        attack_pattern_bb ^= (1ull << attack_square);
-
-        if (((1ull << attack_square) & ally_occupancy) != 0) {
-            continue;
-        }
-
-        Move move{};
-        move.source_square = king_pos_ind;
-        move.target_square = attack_square;
-
-        move.source_piece = static_cast<PieceType>(player * 6 + WhiteKing);
-        move.promotion_piece = static_cast<PieceType>(player * 6 + WhiteKing);
-
-        // capturing
-        if (((1ull << attack_square) & opponent_occupancy) != 0) {
-            move.type = CaptureSimple;
-            move.target_piece = board.GetPieceTypeBySquare(1ull << attack_square);
-
-            all_moves->push_back(move);
-        }
-        else { // simple move
-            move.type = MoveSimple;
-            move.target_piece = board.GetPieceTypeBySquare(1ull << attack_square);
-
-            all_moves->push_back(move);
-        }
-    }
 
     // long castling
     bitboard opponent_attacks = 0ull;
@@ -420,70 +267,24 @@ void MoveGenerator::GenerateKingMoves(const BitBoard &board, std::vector<Move> *
 
 bitboard MoveGenerator::GeneratePlayerAttacks(const BitBoard& board, PlayerColor player) {
     bitboard attacks_bb = 0;
-
-    // Pawns
-    bitboard pawns = board.GetPiecePositions(static_cast<PieceType>(player * 6 + WhitePawn));
-    while(pawns) {
-        bitboard pos_bb = BoardRayIterator::LS1B(pawns);
-        squareInd pos = BoardRayIterator::MS1BInd(pos_bb);
-
-        pawns ^= pos_bb;
-
-        bitboard pawn_attacks_bb = PrecomputedPiecePatterns::GetPawnAttackPattern(player, pos);
-        attacks_bb |= pawn_attacks_bb;
-    }
-
-    // Knights
-    bitboard knights = board.GetPiecePositions(static_cast<PieceType>(player * 6 + WhiteKnight));
-    while(knights) {
-        bitboard pos_bb = BoardRayIterator::LS1B(knights);
-        squareInd pos = BoardRayIterator::MS1BInd(pos_bb);
-
-        knights ^= pos_bb;
-
-        bitboard knight_attacks_bb = PrecomputedPiecePatterns::GetKnightAttackPattern(pos);
-        attacks_bb |= knight_attacks_bb;
-    }
-
-    // King
-    {
-        bitboard king = board.GetPiecePositions(static_cast<PieceType>(player * 6 + WhiteKing));
-        squareInd pos = BoardRayIterator::MS1BInd(king);
-
-        bitboard king_attacks_bb = PrecomputedPiecePatterns::GetKingAttackPattern(pos);
-        attacks_bb |= king_attacks_bb;
-    }
-
     bitboard opponent_occupancy = (player == PlayerColor::White ?
                                    GenerateBlackOccupiedPositions(board) : GenerateWhiteOccupiedPositions(board));
     bitboard ally_occupancy = (player == PlayerColor::White ?
                                GenerateWhiteOccupiedPositions(board) : GenerateBlackOccupiedPositions(board));
+    bitboard blockers = opponent_occupancy | ally_occupancy;
 
-    // Bishops
-    bitboard bishops = board.GetPiecePositions(static_cast<PieceType>(player * 6 + WhiteBishop));
-    while(bishops) {
-        squareInd pos = BoardRayIterator::MS1BInd(bishops);
-        bishops ^= (1ull << pos);
+    for (size_t piece_ind = static_cast<PieceType>(player * 6 + WhitePawn); piece_ind <= player * 6 + WhiteKing; ++piece_ind) {
+        bitboard pieces = board.GetPiecePositions(static_cast<PieceType>(piece_ind));
+        while(pieces) {
+            bitboard pos_bb = BoardRayIterator::LS1B(pieces);
+            squareInd pos = BoardRayIterator::MS1BInd(pos_bb);
 
-        attacks_bb |= PrecomputedPiecePatterns::GetBishopAttackPattern(pos, opponent_occupancy | ally_occupancy);
-    }
+            pieces ^= pos_bb;
 
-    // Rooks
-    bitboard rooks = board.GetPiecePositions(static_cast<PieceType>(player * 6 + WhiteRook));
-    while (rooks) {
-        squareInd pos = BoardRayIterator::MS1BInd(rooks);
-        rooks ^= (1ull << pos);
-
-        attacks_bb |= PrecomputedPiecePatterns::GetRookAttackPattern(pos, opponent_occupancy | ally_occupancy);
-    }
-
-    // Queens
-    bitboard queens = board.GetPiecePositions(static_cast<PieceType>(player * 6 + WhiteQueen));
-    while(queens) {
-        squareInd pos = BoardRayIterator::MS1BInd(queens);
-        queens ^= (1ull << pos);
-
-        attacks_bb |= PrecomputedPiecePatterns::GetQueenAttackPattern(pos, opponent_occupancy | ally_occupancy);
+            bitboard pawn_attacks_bb = PrecomputedPiecePatterns::GetPieceAttackPattern(
+                    player, static_cast<PieceType>(piece_ind), pos, blockers);
+            attacks_bb |= pawn_attacks_bb;
+        }
     }
 
     attacks_bb &= ~ally_occupancy;

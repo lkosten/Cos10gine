@@ -43,21 +43,18 @@ struct Move {
 class MoveGenerator {
 public:
     static std::vector<Move> GenerateMoves(const BitBoard& board, PlayerColor player = PlayerColor::PLAYER_NUMBER);
+    static void GeneratePieceMoves(const BitBoard &board, std::vector<Move> *all_moves, PlayerColor player, PieceType piece);
+
     static bitboard GeneratePlayerAttacks(const BitBoard& board, PlayerColor player = PlayerColor::PLAYER_NUMBER);
     static bool IsKingInCheck(const BitBoard& board, PlayerColor player = PlayerColor::PLAYER_NUMBER);
 
 private:
-
     static bitboard GenerateOccupiedPositions(const BitBoard &board);
     static bitboard GenerateBlackOccupiedPositions(const BitBoard &board);
     static bitboard GenerateWhiteOccupiedPositions(const BitBoard &board);
 
     static void GeneratePawnMoves(const BitBoard &board, std::vector<Move> *all_moves, PlayerColor player);
-    static void GenerateKnightMoves(const BitBoard &board, std::vector<Move> *all_moves, PlayerColor player);
-    static void GenerateBishopMoves(const BitBoard &board, std::vector<Move> *all_moves, PlayerColor player);
-    static void GenerateRookMoves(const BitBoard &board, std::vector<Move> *all_moves, PlayerColor player);
-    static void GenerateQueenMoves(const BitBoard &board, std::vector<Move> *all_moves, PlayerColor player);
-    static void GenerateKingMoves(const BitBoard &board, std::vector<Move> *all_moves, PlayerColor player);
+    static void GenerateCastleMoves(const BitBoard &board, std::vector<Move> *all_moves, PlayerColor player);
 };
 
 

@@ -206,32 +206,39 @@ std::vector<bitboard> PrecomputedPiecePatterns::GenerateKingPrecomputePatterns()
     return pattern;
 }
 
-bitboard PrecomputedPiecePatterns::GetKnightAttackPattern(squareInd pos) {
-    return kKnightAttacksPattern[pos];
-}
+bitboard PrecomputedPiecePatterns::GetPieceAttackPattern(PlayerColor player, PieceType piece, squareInd pos, bitboard blockers) {
+    switch (piece) {
+        case WhitePawn:
+        case BlackPawn:
+            return kPawnAttacksPattern[player][pos];
 
-bitboard PrecomputedPiecePatterns::GetKingAttackPattern(squareInd pos) {
-    return kKingAttacksPattern[pos];
+        case WhiteKnight:
+        case BlackKnight:
+            return kKnightAttacksPattern[pos];
+
+        case WhiteKing:
+        case BlackKing:
+            return kKingAttacksPattern[pos];
+
+        case WhiteBishop:
+        case BlackBishop:
+
+        case WhiteRook:
+        case BlackRook:
+
+        case WhiteQueen:
+        case BlackQueen:
+            return MagicBitboards::GetPieceAttackPattern(piece, pos, blockers);
+
+        default:
+            break;
+    }
+
+    return 0;
 }
 
 bitboard PrecomputedPiecePatterns::GetPawnPushPattern(PlayerColor player, squareInd pos) {
     return kPawnPushesPattern[player][pos];
-}
-
-bitboard PrecomputedPiecePatterns::GetPawnAttackPattern(PlayerColor player, squareInd pos) {
-    return kPawnAttacksPattern[player][pos];
-}
-
-bitboard PrecomputedPiecePatterns::GetBishopAttackPattern(squareInd pos, bitboard blockers) {
-    return MagicBitboards::GetPieceAttackPattern(WhiteBishop, pos, blockers);
-}
-
-bitboard PrecomputedPiecePatterns::GetRookAttackPattern(squareInd pos, bitboard blockers) {
-    return MagicBitboards::GetPieceAttackPattern(WhiteRook, pos, blockers);
-}
-
-bitboard PrecomputedPiecePatterns::GetQueenAttackPattern(squareInd pos, bitboard blockers) {
-    return MagicBitboards::GetPieceAttackPattern(WhiteQueen, pos, blockers);
 }
 
 std::vector<std::vector<bitboard>> PrecomputedPiecePatterns::kPawnPushesPattern = GeneratePawnPushesPrecomputePatterns();
