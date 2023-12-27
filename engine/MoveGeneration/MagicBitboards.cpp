@@ -30,6 +30,7 @@ std::vector<std::vector<bitboard>> MagicBitboards::GenerateMagicBitboards(PieceT
                 current_blocker_variant /= 2;
             }
 
+            // Calculate possible moves with blockers bitboard
             bitboard precalc_possible_moves = 0;
             int dir = (piece == PieceType::WhiteBishop ? RayDirection::NE : RayDirection::E);
             while(dir < RayDirection::NUMBER_OF_DIRECTIONS) {
@@ -37,6 +38,7 @@ std::vector<std::vector<bitboard>> MagicBitboards::GenerateMagicBitboards(PieceT
 
                 while(bitboard next_attack = it.GetNextRaySquareBitboard()) {
                     if ((next_attack & current_blocker_bb) != 0) {
+                        precalc_possible_moves |= next_attack;
                         break;
                     }
 
@@ -75,6 +77,41 @@ std::vector<bitboard> MagicBitboards::GenerateBlockerBitboards(PieceType piece) 
     return blocker_bitboards;
 }
 
+const size_t MagicBitboards::kFreedomDegreeSupplement = 1;
+
+bitboard MagicBitboards::GetPieceAttackPattern(PieceType piece, squareInd square, bitboard blockers) {
+    bitboard attack_pattern_bb = 0;
+    size_t index;
+
+    switch (piece) {
+        case WhiteBishop:
+        case BlackBishop:
+            index = ((blockers & kBishopBlockerBitboards[square]) * kBishopMagicNumbers[square]) >> (64 - kBishopMagicNumberFreedomDegrees[square]);
+            attack_pattern_bb |= kBishopMagicBitboards[square][index];
+            break;
+
+        case WhiteRook:
+        case BlackRook:
+            index = ((blockers & kRookBlockerBitboards[square]) * kRookMagicNumbers[square]) >> (64 - kRookMagicNumberFreedomDegrees[square]);
+            attack_pattern_bb |= kRookMagicBitboards[square][index];
+            break;
+
+        case WhiteQueen:
+        case BlackQueen:
+            index = ((blockers & kBishopBlockerBitboards[square]) * kBishopMagicNumbers[square]) >> (64 - kBishopMagicNumberFreedomDegrees[square]);
+            attack_pattern_bb |= kBishopMagicBitboards[square][index];
+            index = ((blockers & kRookBlockerBitboards[square]) * kRookMagicNumbers[square]) >> (64 - kRookMagicNumberFreedomDegrees[square]);
+            attack_pattern_bb |= kRookMagicBitboards[square][index];
+            break;
+
+        default:
+            throw std::runtime_error("Wrong piece passed to magic bitboards");
+            break;
+    }
+
+    return attack_pattern_bb;
+}
+
 std::vector<uint64_t> MagicBitboards::kBishopMagicNumbers = { 12563114949869284214ull, 6134415084254368555ull, 11221545974962354322ull, 12976460313832207120ull, 5822923696126005092ull, 17512789825737118989ull, 10489141587920313665ull, 13956686172688241945ull, 9831804287164514789ull, 8227911301059700901ull, 4609413305929641926ull, 7819041898509815099ull, 10862387483277662554ull, 16690678623116356510ull, 9995820027613481573ull, 2306212735289466236ull, 5176823988360005210ull, 67030301252802231ull, 6462671615508332560ull, 5348459565588253375ull, 11909055103416120019ull, 16894858652535130783ull, 8923615203771425359ull, 759452941579754282ull, 3867116046030348541ull, 11478509260392238960ull, 1689137065981291880ull, 9854769770441107649ull, 3634405999236245104ull, 4965172896744187879ull, 18298586620590001979ull, 3147301687870794725ull, 905593788755108236ull, 4467659872869836371ull, 17504304281428291081ull, 16009996795838894126ull, 8174626797029002018ull, 14114808837603421586ull, 6157692385546266248ull, 9317530139992954424ull, 564089292361648046ull, 4930291060364991151ull, 15043686596675216975ull, 7129659666704934903ull, 7975423646471144448ull, 2532974998439355856ull, 1429632442097408416ull, 13236343913696664844ull, 15368390318100665242ull, 3050820162319417814ull, 9238208355644777928ull, 14920242105704889930ull, 142645090351101441ull, 14078061000895031315ull, 3532338688936174523ull, 12024383868840329243ull, 6545254459170170235ull, 11563050230696806579ull, 15239870182014420131ull, 10850760857901470389ull, 16819907715924496879ull, 5623283950062002713ull, 9332525058396427968ull, 8544376462286823569ull, };
 std::vector<uint64_t> MagicBitboards::kBishopMagicNumberFreedomDegrees = { 7, 6, 6, 6, 6, 6, 6, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 8, 8, 8, 6, 6, 6, 6, 8, 10, 10, 8, 6, 6, 6, 6, 8, 10, 10, 8, 6, 6, 6, 6, 8, 8, 8, 8, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 6, 6, 6, 6, 6, 6, 7, };
 
@@ -86,5 +123,3 @@ std::vector<bitboard> MagicBitboards::kRookBlockerBitboards = GenerateBlockerBit
 
 std::vector<std::vector<bitboard>> MagicBitboards::kBishopMagicBitboards = GenerateMagicBitboards(PieceType::WhiteBishop);
 std::vector<std::vector<bitboard>> MagicBitboards::kRookMagicBitboards = GenerateMagicBitboards(PieceType::WhiteRook);
-
-const size_t MagicBitboards::kFreedomDegreeSupplement = 1;

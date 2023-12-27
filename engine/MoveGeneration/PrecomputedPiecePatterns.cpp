@@ -222,6 +222,18 @@ bitboard PrecomputedPiecePatterns::GetPawnAttackPattern(PlayerColor player, squa
     return kPawnAttacksPattern[player][pos];
 }
 
+bitboard PrecomputedPiecePatterns::GetBishopAttackPattern(squareInd pos, bitboard blockers) {
+    return MagicBitboards::GetPieceAttackPattern(WhiteBishop, pos, blockers);
+}
+
+bitboard PrecomputedPiecePatterns::GetRookAttackPattern(squareInd pos, bitboard blockers) {
+    return MagicBitboards::GetPieceAttackPattern(WhiteRook, pos, blockers);
+}
+
+bitboard PrecomputedPiecePatterns::GetQueenAttackPattern(squareInd pos, bitboard blockers) {
+    return MagicBitboards::GetPieceAttackPattern(WhiteQueen, pos, blockers);
+}
+
 std::vector<std::vector<bitboard>> PrecomputedPiecePatterns::kPawnPushesPattern = GeneratePawnPushesPrecomputePatterns();
 std::vector<std::vector<bitboard>> PrecomputedPiecePatterns::kPawnAttacksPattern = GeneratePawnAttacksPrecomputePatterns();
 std::vector<bitboard> PrecomputedPiecePatterns::kKnightAttacksPattern = GenerateKnightPrecomputePatterns();

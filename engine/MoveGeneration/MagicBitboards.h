@@ -10,6 +10,8 @@
 #include "BoardRepresentation/BitBoard.h"
 
 class MagicBitboards {
+public:
+    static bitboard GetPieceAttackPattern(PieceType piece, squareInd square, bitboard blockers);
 
 private:
     static std::vector<std::vector<bitboard>> GenerateMagicBitboards(PieceType piece);

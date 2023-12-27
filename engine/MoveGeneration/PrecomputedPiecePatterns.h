@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "BoardRepresentation/BitBoard.h"
+#include "MagicBitboards.h"
 
 class PrecomputedPiecePatterns {
 public:
@@ -15,6 +16,10 @@ public:
     static bitboard GetPawnAttackPattern(PlayerColor player, squareInd pos);
     static bitboard GetKnightAttackPattern(squareInd pos);
     static bitboard GetKingAttackPattern(squareInd pos);
+
+    static bitboard GetBishopAttackPattern(squareInd pos, bitboard blockers);
+    static bitboard GetRookAttackPattern(squareInd pos, bitboard blockers);
+    static bitboard GetQueenAttackPattern(squareInd pos, bitboard blockers);
 
 private:
     static std::vector<std::vector<bitboard>> GeneratePawnPushesPrecomputePatterns();
@@ -26,6 +31,8 @@ private:
     static std::vector<std::vector<bitboard>> kPawnAttacksPattern;
     static std::vector<bitboard> kKnightAttacksPattern;
     static std::vector<bitboard> kKingAttacksPattern;
+
+    MagicBitboards magic_bitboards;
 };
 
 
