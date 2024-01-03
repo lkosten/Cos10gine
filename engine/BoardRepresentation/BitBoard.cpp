@@ -22,6 +22,7 @@ BitBoard BitBoard::GetStartBoard() {
     start_board.f_board[PieceType::BlackKing] = StartPieceBitboard::blackKingBitboard;
 
     start_board.f_next_turn_player = PlayerColor::White;
+    start_board.f_castling_rights = { true, true, true, true };
     return start_board;
 }
 
