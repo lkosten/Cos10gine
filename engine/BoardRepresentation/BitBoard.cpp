@@ -23,6 +23,9 @@ BitBoard BitBoard::GetStartBoard() {
 
     start_board.f_next_turn_player = PlayerColor::White;
     start_board.f_castling_rights = { true, true, true, true };
+
+    start_board.f_zobrist_hash = ZobristHash::GetInstance().GetBoardHash(start_board);
+
     return start_board;
 }
 
@@ -62,6 +65,8 @@ void BitBoard::DebugDraw(std::ostream &out) {
 }
 
 bool BitBoard::MakeMove(const Move &move) {
+    f_zobrist_hash = ZobristHash::GetInstance().GetMoveChangedZobristHash(*this, move);
+
     bitboard source_piece_board = (1ull << move.source_square);
     bitboard target_piece_board = (1ull << move.target_square);
 
@@ -278,4 +283,8 @@ bool BitBoard::IsBlackShortCastleAllowed() const {
 
 squareInd BitBoard::GetEnPassantAttackSquare() const {
     return f_en_passant_square;
+}
+
+uint64_t BitBoard::GetZobristHash() const {
+    return f_zobrist_hash;
 }

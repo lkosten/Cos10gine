@@ -35,6 +35,7 @@ public:
     static bitboard MS1B(bitboard bb);
     static squareInd MS1BInd(bitboard bb);
     static std::vector<bitboard> Bitscan(bitboard bb);
+    static std::vector<squareInd> BitscanSquareIndices(bitboard bb);
 
 private:
     static void GeneratrePrecomputeRays();

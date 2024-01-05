@@ -31,6 +31,7 @@ BitBoard FEN::GetBitBoardFromFEN(const std::string &fen) {
         SetFullMoveCounter(&board, tokens[5]);
     }
 
+    board.f_zobrist_hash = ZobristHash::GetInstance().GetBoardHash(board);
     return board;
 }
 

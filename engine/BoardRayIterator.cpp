@@ -160,3 +160,14 @@ std::vector<bitboard> BoardRayIterator::Bitscan(bitboard bb) {
 
     return res;
 }
+
+std::vector<squareInd> BoardRayIterator::BitscanSquareIndices(bitboard bb) {
+    std::vector<squareInd> res;
+
+    while(bb) {
+        res.push_back(MS1BInd(bb));
+        bb ^= MS1B(bb);
+    }
+
+    return res;
+}

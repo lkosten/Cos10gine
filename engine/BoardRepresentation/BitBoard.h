@@ -13,7 +13,8 @@ typedef std::uint8_t squareInd;
 
 #include "PieceDefines.h"
 #include "MoveGeneration/MoveGenerator.h"
-#include "../ChessNotations/FEN.h"
+#include "ChessNotations/FEN.h"
+#include "ZobristHash.h"
 
 class Move;
 
@@ -69,6 +70,8 @@ public:
     bool IsBlackLongCastleAllowed() const;
     bool IsBlackShortCastleAllowed() const;
 
+    uint64_t GetZobristHash() const;
+
     static const bitboard kAFileBitboard = 0x0101010101010101;
     static const bitboard kBFileBitboard = 0x0202020202020202;
     static const bitboard kGFileBitboard = 0x4040404040404040;
@@ -94,6 +97,8 @@ private:
         bool black_short_catle;
 
     } f_castling_rights;
+
+    uint64_t f_zobrist_hash;
 
     void SetEnPassantRule(const Move &move);
     void SetCastlingRights(const Move &move);

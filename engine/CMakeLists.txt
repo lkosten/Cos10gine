@@ -19,6 +19,6 @@ set(SOURCE_FILES
         ChessNotations/FEN.cpp
         MoveGeneration/PrecomputedPiecePatterns.cpp
         MoveGeneration/MagicBitboards.cpp
-        )
+        Search/AlphaBetaSearch.cpp Search/AlphaBetaSearch.h Evaluation/SimpleEvaluation.cpp Evaluation/SimpleEvaluation.h BoardRepresentation/ZobristHash.cpp BoardRepresentation/ZobristHash.h)
 
 add_library(ChessEngine_lib STATIC ${SOURCE_FILES} ${HEADER_FILES})
