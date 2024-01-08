@@ -13,7 +13,7 @@ public:
     static Move GetBestMove(BitBoard board);
 
 private:
-    static pos_eval Negamax(const BitBoard &board, size_t depth, size_t ply, pos_eval alpha, pos_eval beta, Move *best_move);
+    static pos_eval Negamax(const BitBoard &board, int depth, int ply, pos_eval alpha, pos_eval beta, Move *best_move);
 
     static const pos_eval kMateEval = 100'000'000;
     static const pos_eval kInfinityEval = 1'000'000'000;

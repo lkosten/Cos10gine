@@ -14,7 +14,7 @@ Move AlphaBetaSearch::GetBestMove(BitBoard board) {
     return best_move;
 }
 
-pos_eval AlphaBetaSearch::Negamax(const BitBoard &init_board, size_t depth, size_t ply, pos_eval alpha, pos_eval beta,
+pos_eval AlphaBetaSearch::Negamax(const BitBoard &init_board, int depth, int ply, pos_eval alpha, pos_eval beta,
                                   Move *best_move) {
     if (depth == 0) {
         return SimpleEvaluation::Evaluate(init_board) *
@@ -52,7 +52,7 @@ pos_eval AlphaBetaSearch::Negamax(const BitBoard &init_board, size_t depth, size
 
     if (legal_moves == 0) {
         if (MoveGenerator::IsKingInCheck(board)) {
-            return kMateEval * (init_board.GetPlayerToMove() == PlayerColor::White ? 1 : -1);
+            return -kMateEval + ply;
         } else {
             return 0;
         }
