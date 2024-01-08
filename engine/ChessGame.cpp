@@ -5,12 +5,14 @@
 #include <iostream>
 #include "ChessGame.h"
 
-ChessGame::ChessGame() : f_boards() {
+ChessGame::ChessGame() : f_boards(), f_positions_count() {
     f_boards.push_back(BitBoard::GetStartBoard());
+    f_positions_count[f_boards.back().GetZobristHash()]++;
 }
 
-ChessGame::ChessGame(const std::string &fen) : f_boards() {
+ChessGame::ChessGame(const std::string &fen) : f_boards(), f_positions_count() {
     f_boards.push_back(FEN::GetBitBoardFromFEN(fen));
+    f_positions_count[f_boards.back().GetZobristHash()]++;
 }
 
 bool ChessGame::TryMakeMove(const Move &move) {
@@ -18,6 +20,7 @@ bool ChessGame::TryMakeMove(const Move &move) {
 
     if (last_board.MakeMove(move)) {
         f_boards.push_back(last_board);
+        f_positions_count[f_boards.back().GetZobristHash()]++;
         return true;
     }
     else {
@@ -27,9 +30,14 @@ bool ChessGame::TryMakeMove(const Move &move) {
 }
 
 void ChessGame::UnMakeMove() {
+    f_positions_count[f_boards.back().GetZobristHash()]--;
     f_boards.pop_back();
 }
 
 BitBoard ChessGame::GetLastBoard() const {
     return f_boards.back();
+}
+
+std::unordered_map<uint64_t, size_t> ChessGame::GetPositionsCount() const {
+    return f_positions_count;
 }

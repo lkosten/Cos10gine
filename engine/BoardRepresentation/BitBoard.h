@@ -56,7 +56,6 @@ public:
     PlayerColor GetPlayerToMove() const { return f_next_turn_player; }
 
     bool MakeMove(const Move &move);
-    void UnMakeMove(const Move &move);
 
     void DebugDraw(std::ostream &out);
 

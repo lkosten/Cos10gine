@@ -2,10 +2,10 @@
 // Created by Kostya on 10/7/2023.
 //
 
+#include <iostream>
 #include "catch/catch_amalgamated.hpp"
 
 #include "BoardRepresentation/BitBoard.h"
-#include "ChessGame.h"
 
 struct PerftResults {
     size_t all_moves;
@@ -15,18 +15,18 @@ struct PerftResults {
     size_t promotions;
     size_t checks;
 
-    bool operator==(const PerftResults& rhs) const {
+    bool operator==(const PerftResults &rhs) const {
         return (all_moves == rhs.all_moves && captures == rhs.captures && en_passants == rhs.en_passants
                 && castles == rhs.castles && promotions == rhs.promotions && checks == rhs.checks);
     }
 
-    std::ostream& operator<<(std::ostream& out) const {
-        out << "All moves: " << all_moves << '\n';
-        out << "Captures: " << captures << '\n';
-        out << "En passants: " << en_passants << '\n';
-        out << "Castles: " << castles << '\n';
-        out << "Promotions: " << promotions << '\n';
-        out << "Checks: " << checks << '\n';
+    friend std::ostream &operator<<(std::ostream &out, const PerftResults &results) {
+        out << "All moves: " << results.all_moves << '\n';
+        out << "Captures: " << results.captures << '\n';
+        out << "En passants: " << results.en_passants << '\n';
+        out << "Castles: " << results.castles << '\n';
+        out << "Promotions: " << results.promotions << '\n';
+        out << "Checks: " << results.checks << '\n';
 
         return out;
     }
@@ -37,15 +37,16 @@ struct PerftResults {
  * https://www.chessprogramming.org/Perft_Results
  * */
 
-void PlayFromPosition(ChessGame *perft_test_game, std::map<size_t, PerftResults> *perft_results, size_t depth,
+void PlayFromPosition(BitBoard *perft_board, std::map<size_t, PerftResults> *perft_results, size_t depth,
                    size_t max_depth) {
     if (depth == max_depth + 1) {
         return;
     }
 
-    auto moves = MoveGenerator::GenerateMoves(perft_test_game->GetLastBoard());
+    auto moves = MoveGenerator::GenerateMoves(*perft_board);
     for (const auto &move: moves) {
-        if (perft_test_game->TryMakeMove(move)) {
+        BitBoard saved_board = *perft_board;
+        if (perft_board->MakeMove(move)) {
             switch (move.type) {
                 case MoveSimple:
                     ++(*perft_results)[depth].all_moves;
@@ -84,14 +85,14 @@ void PlayFromPosition(ChessGame *perft_test_game, std::map<size_t, PerftResults>
                     throw std::runtime_error("Wrong move type\n");
             }
 
-            if (MoveGenerator::IsKingInCheck(perft_test_game->GetLastBoard(),
-                                             perft_test_game->GetLastBoard().GetPlayerToMove())) {
+            if (MoveGenerator::IsKingInCheck(*perft_board,
+                                             perft_board->GetPlayerToMove())) {
                 ++(*perft_results)[depth].checks;
             }
 
-            PlayFromPosition(perft_test_game, perft_results, depth + 1, max_depth);
-            perft_test_game->UnMakeMove();
+            PlayFromPosition(perft_board, perft_results, depth + 1, max_depth);
         }
+        *perft_board = saved_board;
     }
 }
 
@@ -106,8 +107,8 @@ TEST_CASE("Start position perft", "[perft]") {
     };
 
     std::map<size_t, PerftResults> calc_perft;
-    ChessGame game;
-    PlayFromPosition(&game, &calc_perft, 1, 5);
+    BitBoard board = BitBoard::GetStartBoard();
+    PlayFromPosition(&board, &calc_perft, 1, 5);
 
     REQUIRE(calc_perft[1] == right_perft[1]);
     REQUIRE(calc_perft[2] == right_perft[2]);
@@ -127,8 +128,8 @@ TEST_CASE("Position 2 perft", "[perft]") {
     };
 
     std::map<size_t, PerftResults> calc_perft;
-    ChessGame game("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -");
-    PlayFromPosition(&game, &calc_perft, 1, 4);
+    BitBoard board = FEN::GetBitBoardFromFEN("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -");
+    PlayFromPosition(&board, &calc_perft, 1, 4);
 
     REQUIRE(calc_perft[1] == right_perft[1]);
     REQUIRE(calc_perft[2] == right_perft[2]);
@@ -147,8 +148,8 @@ TEST_CASE("Position 3 perft", "[perft]") {
     };
 
     std::map<size_t, PerftResults> calc_perft;
-    ChessGame game("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -");
-    PlayFromPosition(&game, &calc_perft, 1, 6);
+    BitBoard board = FEN::GetBitBoardFromFEN("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -");
+    PlayFromPosition(&board, &calc_perft, 1, 6);
 
     REQUIRE(calc_perft[1] == right_perft[1]);
     REQUIRE(calc_perft[2] == right_perft[2]);
@@ -169,8 +170,8 @@ TEST_CASE("Position 4 perft", "[perft]") {
     };
 
     std::map<size_t, PerftResults> calc_perft;
-    ChessGame game("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1");
-    PlayFromPosition(&game, &calc_perft, 1, 5);
+    BitBoard board = FEN::GetBitBoardFromFEN("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1");
+    PlayFromPosition(&board, &calc_perft, 1, 5);
 
     REQUIRE(calc_perft[1] == right_perft[1]);
     REQUIRE(calc_perft[2] == right_perft[2]);
@@ -190,8 +191,8 @@ TEST_CASE("Position 4.5 perft", "[perft]") {
     };
 
     std::map<size_t, PerftResults> calc_perft;
-    ChessGame game("r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1");
-    PlayFromPosition(&game, &calc_perft, 1, 5);
+    BitBoard board = FEN::GetBitBoardFromFEN("r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1");
+    PlayFromPosition(&board, &calc_perft, 1, 5);
 
     REQUIRE(calc_perft[1] == right_perft[1]);
     REQUIRE(calc_perft[2] == right_perft[2]);
@@ -210,8 +211,8 @@ TEST_CASE("Position 5 perft", "[perft]") {
     };
 
     std::map<size_t, PerftResults> calc_perft;
-    ChessGame game("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8");
-    PlayFromPosition(&game, &calc_perft, 1, 4);
+    BitBoard board = FEN::GetBitBoardFromFEN("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8");
+    PlayFromPosition(&board, &calc_perft, 1, 4);
 
     REQUIRE(calc_perft[1].all_moves == right_perft[1].all_moves);
     REQUIRE(calc_perft[2].all_moves == right_perft[2].all_moves);
@@ -230,8 +231,8 @@ TEST_CASE("Position 6 perft", "[perft]") {
     };
 
     std::map<size_t, PerftResults> calc_perft;
-    ChessGame game("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10");
-    PlayFromPosition(&game, &calc_perft, 1, 4);
+    BitBoard board = FEN::GetBitBoardFromFEN("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10");
+    PlayFromPosition(&board, &calc_perft, 1, 4);
 
     REQUIRE(calc_perft[1].all_moves == right_perft[1].all_moves);
     REQUIRE(calc_perft[2].all_moves == right_perft[2].all_moves);
@@ -250,8 +251,8 @@ TEST_CASE("Start position perft long", "[perft long]") {
     };
 
     std::map<size_t, PerftResults> calc_perft;
-    ChessGame game;
-    PlayFromPosition(&game, &calc_perft, 1, 6);
+    BitBoard board = BitBoard::GetStartBoard();
+    PlayFromPosition(&board, &calc_perft, 1, 6);
 
     REQUIRE(calc_perft[1] == right_perft[1]);
     REQUIRE(calc_perft[2] == right_perft[2]);

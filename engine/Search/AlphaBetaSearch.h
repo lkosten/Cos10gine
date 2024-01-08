@@ -10,7 +10,7 @@
 
 class AlphaBetaSearch {
 public:
-    static Move GetBestMove(BitBoard board);
+    static Move GetBestMove(BitBoard board, std::unordered_map<uint64_t, size_t> prev_positions = std::unordered_map<uint64_t, size_t>());
 
 private:
     struct AlphaBeta {
@@ -20,7 +20,7 @@ private:
         pos_eval beta;
     };
 
-    static pos_eval DFSAlphaBeta(BitBoard board, size_t depth, AlphaBeta alpha_beta, Move &best_move);
+    static pos_eval DFSAlphaBeta(BitBoard board, size_t depth, AlphaBeta alpha_beta, Move &best_move, std::unordered_map<uint64_t, size_t> &prev_positions);
 };
 
 
