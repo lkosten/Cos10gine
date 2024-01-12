@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.24)
 project(lCos10gine)
 
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_FLAGS  "${cmake_cxx_flags} -static")
 
 set(SOURCE_FILES main.cpp)
 add_executable(ChessEngine ${SOURCE_FILES})

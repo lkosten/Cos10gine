@@ -10,7 +10,6 @@
 Move AlphaBetaSearch::GetBestMove(BitBoard board) {
     Move best_move{};
     pos_eval eval = Negamax(board, 6, 1, -kInfinityEval, kInfinityEval, &best_move);
-    std::cout << "Best move eval " << eval << '\n';
     return best_move;
 }
 

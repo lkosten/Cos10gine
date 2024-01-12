@@ -13,7 +13,7 @@ typedef std::uint8_t squareInd;
 
 #include "PieceDefines.h"
 #include "MoveGeneration/MoveGenerator.h"
-#include "ChessNotations/FEN.h"
+#include "Interfaces/FEN.h"
 #include "ZobristHash.h"
 
 class Move;
