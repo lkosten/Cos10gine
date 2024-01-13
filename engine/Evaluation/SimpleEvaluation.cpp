@@ -16,8 +16,14 @@ pos_eval SimpleEvaluation::Evaluate(const BitBoard &board) {
             eval += kPieceValues[piece];
 
             squareInd piece_pos = BoardRayIterator::MS1BInd(piece_bb);
+
             if (piece < PieceType::BlackPawn) {
-                eval += kPieceSquareTables[piece][63 - piece_pos];
+                squareInd file = piece_pos & 7;
+                squareInd rank = piece_pos >> 3;
+                rank = 7 - rank;
+                piece_pos = 8 * rank + file;
+
+                eval += kPieceSquareTables[piece][piece_pos];
             }
             else {
                 eval -= kPieceSquareTables[piece - 6][piece_pos];
