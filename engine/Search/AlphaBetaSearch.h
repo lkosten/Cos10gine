@@ -14,6 +14,7 @@ public:
 
 private:
     static pos_eval Negamax(const BitBoard &board, int depth, int ply, pos_eval alpha, pos_eval beta, Move *best_move);
+    static pos_eval QuiescenceSearch(const BitBoard &board, pos_eval alpha, pos_eval beta);
 
     static const pos_eval kMateEval = 100'000'000;
     static const pos_eval kInfinityEval = 1'000'000'000;
