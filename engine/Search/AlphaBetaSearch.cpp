@@ -2,76 +2,60 @@
 // Created by Kostya on 1/2/2024.
 //
 
+#include <iostream>
+#include <unordered_map>
+
 #include "AlphaBetaSearch.h"
 
 Move AlphaBetaSearch::GetBestMove(BitBoard board) {
     Move best_move{};
-    DFSAlphaBeta(board, 0, AlphaBeta(), best_move);
-    return  best_move;
+    pos_eval eval = Negamax(board, 6, 1, -kInfinityEval, kInfinityEval, &best_move);
+    return best_move;
 }
 
-pos_eval AlphaBetaSearch::DFSAlphaBeta(BitBoard board, size_t depth, AlphaBetaSearch::AlphaBeta alpha_beta, Move &best_move) {
-    if (depth == 6) {
-        return SimpleEvaluation::Evaluate(board);
+pos_eval AlphaBetaSearch::Negamax(const BitBoard &init_board, int depth, int ply, pos_eval alpha, pos_eval beta,
+                                  Move *best_move) {
+    if (depth == 0) {
+        return SimpleEvaluation::Evaluate(init_board) *
+               (init_board.GetPlayerToMove() == PlayerColor::White ? 1 : -1);
     }
 
-    pos_eval evaluation;
-    if (board.GetPlayerToMove() == PlayerColor::White) {
-        // Maximizing player
-        evaluation = -1'000'000'0;
+    size_t legal_moves = 0;
+    BitBoard board = init_board;
+    auto moves = MoveGenerator::GenerateMoves(board);
+    for (const auto &move: moves) {
+        if (board.MakeMove(move)) {
+            ++legal_moves;
 
-        auto moves = MoveGenerator::GenerateMoves(board);
-        for (const auto move : moves) {
-            pos_eval cur_eval;
-            if (!board.MakeMove(move)) {
-                cur_eval = -1'000'000'0;
-            }
-            else {
-                cur_eval = DFSAlphaBeta(board, depth + 1, alpha_beta, best_move);
-            }
-            board.UnMakeMove(move);
+            pos_eval eval = -Negamax(board, depth - 1, ply + 1, -beta, -alpha, best_move);
 
-            if (cur_eval > evaluation) {
-                evaluation = cur_eval;
-                if (depth == 0) {
-                    best_move = move;
+            // fail-hard beta cutoff
+            if (eval >= beta) {
+                return beta;
+            }
+
+            // PV node
+            if (eval > alpha) {
+                alpha = eval;
+
+                if (ply == 1) {
+                    *best_move = move;
                 }
-            }
-
-            alpha_beta.alpha = std::max(alpha_beta.alpha, evaluation);
-            if (alpha_beta.beta <= alpha_beta.alpha) {
-                break;
             }
         }
+
+        board = init_board;
     }
-    else {
-        // Minimizing player
-        evaluation = 1'000'000'0;
 
-        auto moves = MoveGenerator::GenerateMoves(board);
-        for (const auto move : moves) {
-            pos_eval cur_eval;
-            if (!board.MakeMove(move)) {
-                cur_eval = 1'000'000'0;
-            }
-            else {
-                cur_eval = DFSAlphaBeta(board, depth + 1, alpha_beta, best_move);
-            }
-            board.UnMakeMove(move);
+    // if old_alpha != alpha new best move
 
-            if (cur_eval < evaluation) {
-                evaluation = cur_eval;
-                if (depth == 0) {
-                    best_move = move;
-                }
-            }
-
-            alpha_beta.beta = std::min(alpha_beta.beta, evaluation);
-            if (alpha_beta.beta <= alpha_beta.alpha) {
-                break;
-            }
+    if (legal_moves == 0) {
+        if (MoveGenerator::IsKingInCheck(board)) {
+            return -kMateEval + ply;
+        } else {
+            return 0;
         }
     }
 
-    return evaluation;
+    return alpha;
 }

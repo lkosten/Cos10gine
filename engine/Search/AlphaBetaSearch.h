@@ -13,14 +13,10 @@ public:
     static Move GetBestMove(BitBoard board);
 
 private:
-    struct AlphaBeta {
-        AlphaBeta() : alpha(-1'000'000'0), beta(1'000'000'0) {}
+    static pos_eval Negamax(const BitBoard &board, int depth, int ply, pos_eval alpha, pos_eval beta, Move *best_move);
 
-        pos_eval alpha;
-        pos_eval beta;
-    };
-
-    static pos_eval DFSAlphaBeta(BitBoard board, size_t depth, AlphaBeta alpha_beta, Move &best_move);
+    static const pos_eval kMateEval = 100'000'000;
+    static const pos_eval kInfinityEval = 1'000'000'000;
 };
 
 

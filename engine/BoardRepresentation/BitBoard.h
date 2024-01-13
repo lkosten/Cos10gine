@@ -13,7 +13,7 @@ typedef std::uint8_t squareInd;
 
 #include "PieceDefines.h"
 #include "MoveGeneration/MoveGenerator.h"
-#include "ChessNotations/FEN.h"
+#include "Interfaces/FEN.h"
 #include "ZobristHash.h"
 
 class Move;
@@ -56,7 +56,6 @@ public:
     PlayerColor GetPlayerToMove() const { return f_next_turn_player; }
 
     bool MakeMove(const Move &move);
-    void UnMakeMove(const Move &move);
 
     void DebugDraw(std::ostream &out);
 

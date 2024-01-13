@@ -6,7 +6,7 @@
 #define LCOS10GINE_FEN_H
 
 
-#include "../BoardRepresentation/BitBoard.h"
+#include "BoardRepresentation/BitBoard.h"
 
 class BitBoard;
 

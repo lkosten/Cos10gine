@@ -6,6 +6,7 @@
 #define LCOS10GINE_CHESSGAME_H
 
 #include <stack>
+#include <unordered_map>
 #include "BoardRepresentation/BitBoard.h"
 
 class ChessGame {
@@ -17,9 +18,11 @@ public:
     void UnMakeMove();
 
     BitBoard GetLastBoard() const;
+    std::unordered_map<uint64_t, size_t> GetPositionsCount() const;
 
 private:
     std::deque<BitBoard> f_boards;
+    std::unordered_map<uint64_t, size_t> f_positions_count;
 };
 
 
