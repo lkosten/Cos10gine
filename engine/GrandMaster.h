@@ -20,6 +20,7 @@ public:
 
 private:
     ChessGame game;
+    mutable std::mutex board_protection;
 };
 
 

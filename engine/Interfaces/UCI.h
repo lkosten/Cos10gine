@@ -23,11 +23,14 @@ private:
     std::ostream &output_stream;
 
     GrandMaster grand_master;
+    std::atomic_flag search_in_progress;
 
     static std::string MoveToString(const Move &move);
 
     void PefrormUCIPosition(std::stringstream &is_args);
-    std::string PerformUCIGo(std::stringstream &is_args);
+    void PerformUCIGo(std::stringstream &is_args);
+
+    void FindBestMove();
 };
 
 

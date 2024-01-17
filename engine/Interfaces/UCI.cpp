@@ -3,7 +3,10 @@
 //
 
 #include <sstream>
+#include <thread>
+
 #include "UCI.h"
+#include "Search/AlphaBetaSearch.h"
 
 UCI::UCI() : output_stream(std::cout) { }
 
@@ -54,19 +57,19 @@ std::string UCI::PerformUCICommand(const std::string &cmd_line) {
         PefrormUCIPosition(is);
     }
     else if (token == "go") {
-        response = PerformUCIGo(is);
+        PerformUCIGo(is);
     }
-    else if (token == "stop") {
+    else if (token == "stop" || token == "quit") {
+        AlphaBetaSearch::ShouldStopSearch();
+        while(search_in_progress.test());
 
+        response = token == "quit" ? "quit" : "";
     }
     else if (token == "ponderhit") {
         //
     }
     else if (token == "register") {
         //
-    }
-    else if (token == "quit") {
-        response = "quit";
     }
 
     return response;
@@ -150,6 +153,19 @@ void UCI::PefrormUCIPosition(std::stringstream &is_args) {
 
 }
 
-std::string UCI::PerformUCIGo(std::stringstream &is_args) {
-    return "bestmove " + MoveToString(grand_master.GetBestMove()) + "\n";
+void UCI::PerformUCIGo(std::stringstream &is_args) {
+    // read is_args
+
+
+    std::thread search_thread(&UCI::FindBestMove, this);
+    search_thread.detach();
+}
+
+void UCI::FindBestMove() {
+    while(search_in_progress.test_and_set());
+
+    output_stream << "bestmove " + MoveToString(grand_master.GetBestMove()) + "\n";
+    output_stream.flush();
+
+    search_in_progress.clear();
 }
