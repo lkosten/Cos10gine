@@ -7,6 +7,8 @@
 
 #include "ChessGame.h"
 
+struct SearchLimits;
+
 class GrandMaster {
 public:
     GrandMaster() = default;
@@ -15,7 +17,7 @@ public:
 
     bool TryMakeMove(const Move &move);
 
-    Move GetBestMove() const;
+    Move GetBestMove(SearchLimits limits) const;
     BitBoard GetCurrentBoard() const;
 
 private:

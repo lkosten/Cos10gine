@@ -4,15 +4,15 @@
 
 #include <iostream>
 #include <unordered_map>
+#include <thread>
 
 #include "AlphaBetaSearch.h"
 
-Move AlphaBetaSearch::GetBestMove(BitBoard board) {
+Move AlphaBetaSearch::GetBestMove(BitBoard board, SearchLimits limits) {
     kStopSearch.store(false);
 
     Move best_move{};
-    best_move = IterativeDeepening(board);
-    //pos_eval eval = Negamax(board, 4, 1, -kInfinityEval, kInfinityEval, &best_move);
+    best_move = IterativeDeepening(board, limits);
     return best_move;
 }
 
@@ -53,8 +53,6 @@ pos_eval AlphaBetaSearch::Negamax(const BitBoard &init_board, int depth, int ply
                 alpha = eval;
 
                 if (ply == 1) {
-                    if (depth == 3)
-                        std::cout << alpha << std::endl;
                     *best_move = move;
                 }
             }
@@ -124,23 +122,31 @@ pos_eval AlphaBetaSearch::QuiescenceSearch(const BitBoard &init_board, pos_eval 
     return alpha;
 }
 
-Move AlphaBetaSearch::IterativeDeepening(const BitBoard &board) {
-    bool is_enough_time = true;
+Move AlphaBetaSearch::IterativeDeepening(const BitBoard &board, SearchLimits limits) {
+    std::thread timer_thread([&](uint32_t time_to_wait) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(time_to_wait));
+        ShouldStopSearch();
+    }, 5000);
+    timer_thread.detach();
+
     int depth = 1;
     Move best_move{};
+    pos_eval best_eval = 0;
     do {
         Move cur_depth_best_move{};
-        Negamax(board, depth, 1, -kInfinityEval, kInfinityEval, &cur_depth_best_move);
+        pos_eval eval = Negamax(board, depth, 1, -kInfinityEval, kInfinityEval, &cur_depth_best_move);
 
-        if (is_enough_time /* TODO if not interrupted */) {
+        if (!kStopSearch.load()) {
             best_move = cur_depth_best_move;
+            best_eval = eval;
         }
 
         ++depth;
-        // TODO calculate time
 
-    } while(is_enough_time && depth <= kMaxDepth);
+    } while(!kStopSearch.load() && depth <= kMaxDepth);
 
+    std::cout << "info score cp " << best_eval << " depth " << depth - 1 << std::endl;
+    std::cout << "info depth " << depth - 1 << std::endl;
     return best_move;
 }
 

@@ -31,6 +31,6 @@ bool GrandMaster::TryMakeMove(const Move &move) {
     return game.TryMakeMove(move);
 }
 
-Move GrandMaster::GetBestMove() const {
-    return AlphaBetaSearch::GetBestMove(GetCurrentBoard());
+Move GrandMaster::GetBestMove(SearchLimits limits) const {
+    return AlphaBetaSearch::GetBestMove(GetCurrentBoard(), limits);
 }
