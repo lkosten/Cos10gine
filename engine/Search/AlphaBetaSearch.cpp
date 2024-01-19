@@ -25,7 +25,9 @@ pos_eval AlphaBetaSearch::Negamax(const BitBoard &init_board, int depth, int ply
     if (kStopSearch.load()) {
         return 0;
     }
-
+    if (init_board.IsThreefoldRepetition()) {
+        return 0;
+    }
     if (depth == 0) {
         return QuiescenceSearch(init_board, alpha, beta);
     }
@@ -139,14 +141,14 @@ Move AlphaBetaSearch::IterativeDeepening(const BitBoard &board, SearchLimits lim
         if (!kStopSearch.load()) {
             best_move = cur_depth_best_move;
             best_eval = eval;
+            std::cout << "info depth " << depth - 1 << std::endl;
         }
 
         ++depth;
 
     } while(!kStopSearch.load() && depth <= kMaxDepth);
 
-    std::cout << "info score cp " << best_eval << " depth " << depth - 1 << std::endl;
-    std::cout << "info depth " << depth - 1 << std::endl;
+    std::cout << "info score cp " << best_eval << std::endl;
     return best_move;
 }
 
