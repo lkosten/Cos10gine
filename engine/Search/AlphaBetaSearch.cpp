@@ -8,8 +8,14 @@
 
 #include "AlphaBetaSearch.h"
 
-Move AlphaBetaSearch::GetBestMove(BitBoard board, SearchLimits limits) {
+Move AlphaBetaSearch::GetBestMove(const BitBoard& board, SearchLimits limits) {
     kStopSearch.store(false);
+
+    std::thread timer_thread([&](uint32_t time_to_wait) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(time_to_wait));
+        ShouldStopSearch();
+    }, CalculateTimeForMove(board, limits));
+    timer_thread.detach();
 
     Move best_move{};
     best_move = IterativeDeepening(board, limits);
@@ -125,12 +131,6 @@ pos_eval AlphaBetaSearch::QuiescenceSearch(const BitBoard &init_board, pos_eval 
 }
 
 Move AlphaBetaSearch::IterativeDeepening(const BitBoard &board, SearchLimits limits) {
-    std::thread timer_thread([&](uint32_t time_to_wait) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(time_to_wait));
-        ShouldStopSearch();
-    }, 5000);
-    timer_thread.detach();
-
     int depth = 1;
     Move best_move{};
     pos_eval best_eval = 0;
@@ -153,3 +153,13 @@ Move AlphaBetaSearch::IterativeDeepening(const BitBoard &board, SearchLimits lim
 }
 
 std::atomic_bool AlphaBetaSearch::kStopSearch = false;
+
+uint32_t AlphaBetaSearch::CalculateTimeForMove(const BitBoard &board, SearchLimits limits) {
+    uint32_t number_of_moves = board.GetNumberOfMoves();
+
+    double factor = 3 - std::min(20u, number_of_moves) / 20.f;
+    double target_time = static_cast<double>(limits.player_time[board.GetPlayerToMove()]) /
+            std::max(30 - static_cast<int>(number_of_moves), 5);
+
+    return factor * target_time;
+}

@@ -5,6 +5,7 @@
 #ifndef LCOS10GINE_GRANDMASTER_H
 #define LCOS10GINE_GRANDMASTER_H
 
+#include <mutex>
 #include "ChessGame.h"
 
 struct SearchLimits;

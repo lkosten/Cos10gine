@@ -239,3 +239,7 @@ uint64_t BitBoard::GetZobristHash() const {
 bool BitBoard::IsThreefoldRepetition() const {
     return f_is_threefold_repetition;
 }
+
+uint32_t BitBoard::GetNumberOfMoves() const {
+    return f_repetition_table.size() / 2 + 1;
+}

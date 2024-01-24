@@ -70,6 +70,7 @@ public:
     bool IsBlackShortCastleAllowed() const;
 
     uint64_t GetZobristHash() const;
+    uint32_t GetNumberOfMoves() const;
 
     bool IsThreefoldRepetition() const;
 

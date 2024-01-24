@@ -7,6 +7,7 @@
 
 
 #include <iostream>
+#include <atomic>
 
 #include "GrandMaster.h"
 
