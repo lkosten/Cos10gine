@@ -3,7 +3,10 @@
 //
 
 #include <sstream>
+#include <thread>
+
 #include "UCI.h"
+#include "Search/AlphaBetaSearch.h"
 
 UCI::UCI() : output_stream(std::cout) { }
 
@@ -54,19 +57,19 @@ std::string UCI::PerformUCICommand(const std::string &cmd_line) {
         PefrormUCIPosition(is);
     }
     else if (token == "go") {
-        response = PerformUCIGo(is);
+        PerformUCIGo(is);
     }
-    else if (token == "stop") {
+    else if (token == "stop" || token == "quit") {
+        AlphaBetaSearch::ShouldStopSearch();
+        while(search_in_progress.test());
 
+        response = token == "quit" ? "quit" : "";
     }
     else if (token == "ponderhit") {
         //
     }
     else if (token == "register") {
         //
-    }
-    else if (token == "quit") {
-        response = "quit";
     }
 
     return response;
@@ -150,6 +153,52 @@ void UCI::PefrormUCIPosition(std::stringstream &is_args) {
 
 }
 
-std::string UCI::PerformUCIGo(std::stringstream &is_args) {
-    return "bestmove " + MoveToString(grand_master.GetBestMove()) + "\n";
+void UCI::PerformUCIGo(std::stringstream &is_args) {
+    std::string token;
+    SearchLimits limits{};
+
+    while(is_args >> token) {
+        if (token == "wtime") {
+            is_args >> limits.player_time[PlayerColor::White];
+        }
+        else if (token == "btime") {
+            is_args >> limits.player_time[PlayerColor::Black];
+        }
+        else if (token == "winc") {
+            is_args >> limits.player_increase[PlayerColor::Black];
+        }
+        else if (token == "binc") {
+            is_args >> limits.player_increase[PlayerColor::Black];
+        }
+        else if (token == "movestogo") {
+            is_args >> limits.moves_to_go;
+        }
+        else if (token == "depth") {
+            is_args >> limits.depth;
+        }
+        else if (token == "nodes") {
+            is_args >> limits.nodes;
+        }
+        else if (token == "mate") {
+            is_args >> limits.mate;
+        }
+        else if (token == "movetime") {
+            is_args >> limits.move_time;
+        }
+        else if (token == "infinite") {
+            limits.infinite_search = true;
+        }
+    }
+
+    std::thread search_thread(&UCI::FindBestMove, this, limits);
+    search_thread.detach();
+}
+
+void UCI::FindBestMove(SearchLimits limits) {
+    while(search_in_progress.test_and_set());
+
+    output_stream << "bestmove " + MoveToString(grand_master.GetBestMove(limits)) + "\n";
+    output_stream.flush();
+
+    search_in_progress.clear();
 }

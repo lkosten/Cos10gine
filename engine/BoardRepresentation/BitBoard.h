@@ -70,6 +70,9 @@ public:
     bool IsBlackShortCastleAllowed() const;
 
     uint64_t GetZobristHash() const;
+    uint32_t GetNumberOfMoves() const;
+
+    bool IsThreefoldRepetition() const;
 
     static const bitboard kAFileBitboard = 0x0101010101010101;
     static const bitboard kBFileBitboard = 0x0202020202020202;
@@ -98,6 +101,8 @@ private:
     } f_castling_rights;
 
     uint64_t f_zobrist_hash;
+    std::vector<uint64_t> f_repetition_table;
+    bool f_is_threefold_repetition;
 
     void SetEnPassantRule(const Move &move);
     void SetCastlingRights(const Move &move);

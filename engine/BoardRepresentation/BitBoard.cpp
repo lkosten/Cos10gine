@@ -129,6 +129,12 @@ bool BitBoard::MakeMove(const Move &move) {
 
     SetEnPassantRule(move);
     SetCastlingRights(move);
+    f_repetition_table.push_back(f_zobrist_hash);
+    if (!f_is_threefold_repetition &&
+        std::count(f_repetition_table.begin(), f_repetition_table.end(), f_zobrist_hash) >= 3) {
+        f_is_threefold_repetition = true;
+    }
+
     return !MoveGenerator::IsKingInCheck(*this, static_cast<PlayerColor>(!f_next_turn_player));
 }
 
@@ -228,4 +234,12 @@ squareInd BitBoard::GetEnPassantAttackSquare() const {
 
 uint64_t BitBoard::GetZobristHash() const {
     return f_zobrist_hash;
+}
+
+bool BitBoard::IsThreefoldRepetition() const {
+    return f_is_threefold_repetition;
+}
+
+uint32_t BitBoard::GetNumberOfMoves() const {
+    return f_repetition_table.size() / 2 + 1;
 }
